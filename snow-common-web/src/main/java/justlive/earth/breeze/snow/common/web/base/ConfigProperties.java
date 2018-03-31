@@ -109,4 +109,6 @@ public class ConfigProperties {
   @Value("${security.session.maximum:1}")
   public int sessionMaximum;
 
+  @Value("${security.filterChainDefinitions:/logout=logoutFilter\\n/callback=callbackFilter\\n/**=securityFilter}")
+  public String filterChainDefinitions;
 }
