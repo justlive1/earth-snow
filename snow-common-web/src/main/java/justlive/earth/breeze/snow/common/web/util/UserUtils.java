@@ -18,9 +18,11 @@ import justlive.earth.breeze.snow.common.base.util.ReflectUtils;
 public class UserUtils {
 
   private static final String CAS_USERUTILS_CLASS =
-      "git.oschina.net.justlive1.breeze.storm.cas.client.util.CasUserUtils";
+      "justlive.earth.breeze.storm.cas.client.util.CasUserUtils";
   private static final String SECURITY_USERUTILS_CLASS =
-      "git.oschina.net.justlive1.breeze.storm.cas.client.security.util.SercurityUserUtils";
+      "justlive.earth.breeze.storm.cas.client.security.util.SercurityUserUtils";
+  private static final String SHIRO_USERUTILS_CLASS =
+      "justlive.earth.breeze.storm.cas.client.shiro.util.ShiroUserUtils";
 
   private static final Map<String, Method> CACHE_MAP = Maps.newHashMap();
 
@@ -47,6 +49,8 @@ public class UserUtils {
         clazz = ReflectUtils.forName(CAS_USERUTILS_CLASS);
       } else if (ClassUtils.isPresent(SECURITY_USERUTILS_CLASS, UserUtils.class.getClassLoader())) {
         clazz = ReflectUtils.forName(SECURITY_USERUTILS_CLASS);
+      } else if (ClassUtils.isPresent(SHIRO_USERUTILS_CLASS, UserUtils.class.getClassLoader())) {
+        clazz = ReflectUtils.forName(SHIRO_USERUTILS_CLASS);
       }
 
       if (clazz == null) {
