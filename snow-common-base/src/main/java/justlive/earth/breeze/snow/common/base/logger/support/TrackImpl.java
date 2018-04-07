@@ -18,7 +18,13 @@ public class TrackImpl implements Track {
   /**
    * 当前线程UID存储
    */
-  static final ThreadLocal<String> UIDS = new ThreadLocal<>();
+  protected static final ThreadLocal<String> UIDS = new ThreadLocal<>();
+
+  /**
+   * 分隔符
+   */
+  protected static final String SEPERATOR = "-";
+  protected static final String CLASS_SEPERATOR = ".";
 
   /**
    * 记录应用的访问情况的Logger
@@ -63,7 +69,7 @@ public class TrackImpl implements Track {
   @Override
   public void request(String format, Object... args) {
     if (accessEnabled) {
-      String info = String.format("REQ [%s] [%s] [%s]", uid(), ctx(), format);
+      String info = String.format("REQ [%s] [%s] [%s] [%s]", uid(), req(), ctx(), format);
       access.info(info, args);
     }
   }
@@ -71,7 +77,7 @@ public class TrackImpl implements Track {
   @Override
   public void response(String format, Object... args) {
     if (accessEnabled) {
-      String info = String.format("RES [%s] [%s] [%s]", uid(), ctx(), format);
+      String info = String.format("RES [%s] [%s] [%s] [%s]", uid(), req(), ctx(), format);
       access.info(info, args);
     }
   }
@@ -79,7 +85,7 @@ public class TrackImpl implements Track {
   @Override
   public void service(String format, Object... args) {
     if (serviceEnabled) {
-      String info = String.format("SRV [%s] [%s] [%s]", uid(), ctx(), format);
+      String info = String.format("SRV [%s] [%s] [%s] [%s]", uid(), req(), ctx(), format);
       service.info(info, args);
     }
   }
@@ -87,7 +93,7 @@ public class TrackImpl implements Track {
   @Override
   public void gateway(String format, Object... args) {
     if (gatewayEnabled) {
-      String info = String.format("GTW [%s] [%s] [%s]", uid(), ctx(), format);
+      String info = String.format("GTW [%s] [%s] [%s] [%s]", uid(), req(), ctx(), format);
       gateway.info(info, args);
     }
   }
@@ -95,7 +101,7 @@ public class TrackImpl implements Track {
   @Override
   public void batch(String format, Object... args) {
     if (batchEnabled) {
-      String info = String.format("BAT [%s] [%s] [%s]", uid(), ctx(), format);
+      String info = String.format("BAT [%s] [%s] [%s] [%s]", uid(), req(), ctx(), format);
       batch.info(info, args);
     }
   }
@@ -109,18 +115,22 @@ public class TrackImpl implements Track {
     return uid;
   }
 
+  protected String req() {
+    return SEPERATOR;
+  }
+
   protected String ctx() {
     // 构造上下文信息
     final StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
     final StackTraceElement stack = stacks[3];
     StringBuilder context = new StringBuilder();
-    context.append(this.scn(stack.getClassName())).append('.').append(stack.getMethodName())
-        .append("-").append(stack.getLineNumber());
+    context.append(this.scn(stack.getClassName())).append(CLASS_SEPERATOR)
+        .append(stack.getMethodName()).append(SEPERATOR).append(stack.getLineNumber());
     return context.toString();
   }
 
   private String scn(String clazz) {
-    final int index = clazz.lastIndexOf('.');
+    final int index = clazz.lastIndexOf(CLASS_SEPERATOR);
     if (index == -1)
       return clazz;
     return clazz.substring(index + 1);
