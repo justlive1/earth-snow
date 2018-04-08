@@ -1,6 +1,8 @@
 package justlive.earth.breeze.snow.common.web.logger;
 
 import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import justlive.earth.breeze.snow.common.base.logger.support.TrackImpl;
@@ -11,9 +13,20 @@ import justlive.earth.breeze.snow.common.base.logger.support.TrackImpl;
  * @author wubo
  *
  */
+@Component
 public class WebTrack extends TrackImpl {
 
   private static final String UID_IN_COOKIE = "u_=";
+
+  public WebTrack(@Value("${track.access:false}") boolean accessEnabled,
+      @Value("${track.service:false}") boolean serviceEnabled,
+      @Value("${track.gateway:false}") boolean gatewayEnabled,
+      @Value("${track.batch:false}") boolean batchEnabled) {
+    setAccessEnabled(accessEnabled);
+    setServiceEnabled(serviceEnabled);
+    setGatewayEnabled(gatewayEnabled);
+    setBatchEnabled(batchEnabled);
+  }
 
   private HttpServletRequest request() {
     ServletRequestAttributes attrs =
