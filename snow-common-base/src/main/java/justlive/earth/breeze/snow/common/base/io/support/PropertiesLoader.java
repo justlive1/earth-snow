@@ -3,8 +3,8 @@ package justlive.earth.breeze.snow.common.base.io.support;
 import java.io.IOException;
 import java.util.Properties;
 import justlive.earth.breeze.snow.common.base.exception.Exceptions;
+import justlive.earth.breeze.snow.common.base.io.PropertySource;
 import justlive.earth.breeze.snow.common.base.io.SourceResource;
-import justlive.earth.breeze.snow.common.base.util.PlaceHolderHelper;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -17,11 +17,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Slf4j
-public class PropertiesLoader extends AbstractResourceLoader {
-
-  private static final PlaceHolderHelper HELPER = new PlaceHolderHelper(
-      PlaceHolderHelper.DEFAULT_PLACEHOLDER_PREFIX, PlaceHolderHelper.DEFAULT_PLACEHOLDER_SUFFIX,
-      PlaceHolderHelper.DEFAULT_VALUE_SEPARATOR, true);
+public class PropertiesLoader extends AbstractResourceLoader implements PropertySource {
 
   /**
    * 配置路径
@@ -56,11 +52,18 @@ public class PropertiesLoader extends AbstractResourceLoader {
    * @return
    */
   public Properties props() {
+    if (!this.ready) {
+      this.init();
+    }
     return this.props;
   }
 
   @Override
   public void init() {
+    if (this.ready) {
+      return;
+    }
+    this.ready = true;
     this.resources.addAll(this.parse(this.locations));
     for (SourceResource resource : this.resources) {
       try {
@@ -76,19 +79,4 @@ public class PropertiesLoader extends AbstractResourceLoader {
     }
   }
 
-  public String getProperty(String key) {
-    String value = props.getProperty(key);
-    if (value == null) {
-      return value;
-    }
-    return HELPER.replacePlaceholders(value, props);
-  }
-
-  public String getProperty(String key, String defaultValue) {
-    String value = props.getProperty(key, defaultValue);
-    if (value == null) {
-      return value;
-    }
-    return HELPER.replacePlaceholders(value, props);
-  }
 }

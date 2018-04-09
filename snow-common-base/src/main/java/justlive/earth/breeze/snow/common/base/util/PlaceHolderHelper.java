@@ -30,11 +30,20 @@ public class PlaceHolderHelper {
    */
   public static final String DEFAULT_VALUE_SEPARATOR = ":";
 
+  /**
+   * 默认实例
+   */
+  public static final PlaceHolderHelper DEFAULT_HELPER;
+
   private static final Map<String, String> SIMPLE_PREFIXES = new HashMap<>(4);
+
   static {
     SIMPLE_PREFIXES.put("}", "{");
     SIMPLE_PREFIXES.put("]", "[");
     SIMPLE_PREFIXES.put(")", "(");
+
+    DEFAULT_HELPER = new PlaceHolderHelper(DEFAULT_PLACEHOLDER_PREFIX, DEFAULT_PLACEHOLDER_SUFFIX,
+        DEFAULT_VALUE_SEPARATOR, true);
   }
 
   private final String placeholderPrefix;
@@ -66,6 +75,10 @@ public class PlaceHolderHelper {
     }
     this.valueSeparator = valueSeparator;
     this.ignoreUnresolvablePlaceholders = ignoreUnresolvablePlaceholders;
+  }
+
+  public static PlaceHolderHelper defaultInstance() {
+    return DEFAULT_HELPER;
   }
 
   /**

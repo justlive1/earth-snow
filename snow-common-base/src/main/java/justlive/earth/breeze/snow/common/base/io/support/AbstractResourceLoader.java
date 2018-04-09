@@ -70,6 +70,11 @@ public abstract class AbstractResourceLoader {
   protected Charset charset;
 
   /**
+   * 是否已初始化过
+   */
+  protected volatile boolean ready;
+
+  /**
    * 初始化
    */
   public abstract void init();
@@ -166,13 +171,12 @@ public abstract class AbstractResourceLoader {
       if (location.startsWith(BaseConstants.ROOT_PATH)) {
         location = location.substring(BaseConstants.ROOT_PATH.length());
       }
-      Enumeration<URL> resources = null;
-      resources = loader.getResources(location);
-      if (resources == null) {
+      Enumeration<URL> res = loader.getResources(location);
+      if (res == null) {
         return list;
       }
-      while (resources.hasMoreElements()) {
-        URL url = resources.nextElement();
+      while (res.hasMoreElements()) {
+        URL url = res.nextElement();
         list.add(new UrlResource(url));
       }
     }
@@ -277,26 +281,42 @@ public abstract class AbstractResourceLoader {
     }
 
     try {
-      if (log.isDebugEnabled()) {
-        log.debug("Looking for matching resources in jar file [" + jarFileUrl + "]");
-      }
-      if (rootEntryPath.length() > 0 && !rootEntryPath.endsWith(BaseConstants.PATH_SEPARATOR)) {
-        rootEntryPath += BaseConstants.PATH_SEPARATOR;
-      }
-      for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
-        JarEntry entry = entries.nextElement();
-        String entryPath = entry.getName();
-        if (entryPath.startsWith(rootEntryPath)) {
-          String relativePath = entryPath.substring(rootEntryPath.length());
-          if (matcher.match(subPattern, relativePath)) {
-            all.add(resource.createRelative(relativePath));
-          }
-        }
-      }
+      this.look(resource, subPattern, all, jarFile, jarFileUrl, rootEntryPath);
     } finally {
       jarFile.close();
     }
     return all;
+  }
+
+  /**
+   * 查找jar中匹配的资源
+   * 
+   * @param resource
+   * @param subPattern
+   * @param all
+   * @param jarFile
+   * @param jarFileUrl
+   * @param rootEntryPath
+   * @throws IOException
+   */
+  private void look(SourceResource resource, String subPattern, List<SourceResource> all,
+      JarFile jarFile, String jarFileUrl, String rootEntryPath) throws IOException {
+    if (log.isDebugEnabled()) {
+      log.debug("Looking for matching resources in jar file [" + jarFileUrl + "]");
+    }
+    if (rootEntryPath.length() > 0 && !rootEntryPath.endsWith(BaseConstants.PATH_SEPARATOR)) {
+      rootEntryPath += BaseConstants.PATH_SEPARATOR;
+    }
+    for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
+      JarEntry entry = entries.nextElement();
+      String entryPath = entry.getName();
+      if (entryPath.startsWith(rootEntryPath)) {
+        String relativePath = entryPath.substring(rootEntryPath.length());
+        if (matcher.match(subPattern, relativePath)) {
+          all.add(resource.createRelative(relativePath));
+        }
+      }
+    }
   }
 
   /**
