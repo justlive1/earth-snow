@@ -1,6 +1,9 @@
 package justlive.earth.breeze.snow.common.base.exception;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.Data;
 
 /**
@@ -42,9 +45,8 @@ public class ErrorCode implements Serializable {
 
   @Override
   public String toString() {
-    if (this.module == null) {
-      return this.code;
-    }
-    return this.module + "." + this.code;
+    return Arrays.asList(this.module, this.code, this.message).stream().filter(Objects::nonNull)
+        .collect(Collectors.joining("."));
   }
+
 }
