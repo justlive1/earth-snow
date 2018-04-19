@@ -60,7 +60,7 @@ public class CodedExceptionResolver extends SimpleMappingExceptionResolver {
     }
 
     // 包装Response对象
-    final Map<String, String> error;
+    final Map<String, Object> error;
     // 确定当前异常是业务异常还是系统故障。为了防止信息丢失，除了明确使用NoStackException，其余的异常都认为是系统故障
     boolean isFault = true;
     if (CodedException.class.isInstance(ex)) {
@@ -123,10 +123,11 @@ public class CodedExceptionResolver extends SimpleMappingExceptionResolver {
    * @param ex
    * @return
    */
-  private Map<String, String> buildError(CodedException ex) {
-    Map<String, String> err = Maps.newHashMap();
+  private Map<String, Object> buildError(CodedException ex) {
+    Map<String, Object> err = Maps.newHashMap();
     err.put(BaseConstants.RESP_CODE_FIELD, ex.getErrorCode().toString());
     err.put(BaseConstants.RESP_MESSAGE_FIELD, ex.getMessage());
+    err.put(BaseConstants.RESP_IS_SUCCESS, false);
     return err;
   }
 
@@ -136,10 +137,11 @@ public class CodedExceptionResolver extends SimpleMappingExceptionResolver {
    * @param ex
    * @return
    */
-  private Map<String, String> buildError(Exception ex) {
-    Map<String, String> err = Maps.newHashMap();
+  private Map<String, Object> buildError(Exception ex) {
+    Map<String, Object> err = Maps.newHashMap();
     err.put(BaseConstants.RESP_CODE_FIELD, ex.getClass().getSimpleName());
     err.put(BaseConstants.RESP_MESSAGE_FIELD, ex.getMessage());
+    err.put(BaseConstants.RESP_IS_SUCCESS, false);
     return err;
   }
 

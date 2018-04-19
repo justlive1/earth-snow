@@ -24,6 +24,11 @@ public class BaseConstants {
    * 返回实体message属性字段
    */
   public static final String RESP_MESSAGE_FIELD = "message";
+  
+  /**
+   * 返回实体success属性字段
+   */
+  public static final String RESP_IS_SUCCESS = "success";
 
   /**
    * 匹配所有
