@@ -20,8 +20,8 @@ public class ApplicationTest {
 
     TimeUnit.SECONDS.sleep(12);
 
-    vertx.createHttpClient().get(8080, "localhost", "/demo/test/path?request=path")
-        .putHeader("header", "header").handler(res -> {
+    vertx.createHttpClient().get(8080, "localhost", "/demo/test/1000?request=path")
+        .putHeader("header", "true").handler(res -> {
           res.bodyHandler(System.out::println);
         }).exceptionHandler(System.out::println).end();
 

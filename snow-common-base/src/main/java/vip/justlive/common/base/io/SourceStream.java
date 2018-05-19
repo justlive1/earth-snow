@@ -27,8 +27,8 @@ public interface SourceStream {
   /**
    * 获取输入流
    * 
-   * @return
-   * @throws IOException
+   * @return 输入流
+   * @throws IOException io异常
    */
   InputStream getInputStream() throws IOException;
 }

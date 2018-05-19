@@ -45,8 +45,8 @@ public class ReflectUtils {
   /**
    * 获取class
    * 
-   * @param className
-   * @return
+   * @param className 类名
+   * @return 类
    */
   public static Class<?> forName(String className) {
     Class<?> clazz = null;
@@ -78,8 +78,9 @@ public class ReflectUtils {
   /**
    * 实例化对象
    * 
-   * @param className
-   * @return
+   * @param className 类名
+   * @param <T> 泛型类
+   * @return 实例化对象
    */
   @SuppressWarnings("unchecked")
   public static <T> T fromName(String className) {
@@ -197,7 +198,7 @@ public class ReflectUtils {
    * clone一个Object使用序列号的形式
    * 
    * @param src 需要序列化的对象
-   * @return
+   * @return 拷贝对象
    */
   public static Object byteClone(Object src) {
 

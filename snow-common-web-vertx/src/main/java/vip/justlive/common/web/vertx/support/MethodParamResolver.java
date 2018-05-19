@@ -27,25 +27,25 @@ public interface MethodParamResolver {
   /**
    * 当前方法参数是否支持
    * 
-   * @param parameter
-   * @return
+   * @param parameter 参数
+   * @return true为支持
    */
   boolean supported(Parameter parameter);
 
   /**
    * 解析当前方法参数
    * 
-   * @param parameter
-   * @return
+   * @param parameter 参数
+   * @return 参数解析结果
    */
   ParamWrap resolve(Parameter parameter);
 
   /**
    * 渲染获取当前参数值
    * 
-   * @param wrap
-   * @param ctx
-   * @return
+   * @param wrap 参数包装
+   * @param ctx 路由上下文
+   * @return 渲染对象
    */
   Object render(ParamWrap wrap, RoutingContext ctx);
 }

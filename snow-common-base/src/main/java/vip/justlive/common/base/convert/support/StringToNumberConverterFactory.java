@@ -20,7 +20,7 @@ import vip.justlive.common.base.convert.ConverterFactory;
 import vip.justlive.common.base.util.NumberUtils;
 
 /**
- * String -> Number 解析器
+ * String - Number 解析器
  * 
  * @author wubo
  * @see java.lang.Byte
@@ -31,7 +31,6 @@ import vip.justlive.common.base.util.NumberUtils;
  * @see java.lang.Float
  * @see java.lang.Double
  * @see java.math.BigDecimal
- * @param <T>
  */
 public class StringToNumberConverterFactory implements ConverterFactory<String, Number> {
 

@@ -20,23 +20,24 @@ import java.util.List;
  * 
  * @author wubo
  *
- * @param <S>
- * @param <R>
+ * @param <S> 泛型类
+ * @param <R> 泛型类
  */
 public interface ConverterFactory<S, R> {
 
   /**
    * 获取转换器
    * 
-   * @param targetType
-   * @return
+   * @param targetType 目标类型
+   * @param <T> 泛型类
+   * @return 转换器
    */
   <T extends R> Converter<S, T> getConverter(Class<T> targetType);
 
   /**
    * 获取所有支持的转换器
    * 
-   * @return
+   * @return 转换器列表
    */
   List<Converter<Object, Object>> converters();
 }

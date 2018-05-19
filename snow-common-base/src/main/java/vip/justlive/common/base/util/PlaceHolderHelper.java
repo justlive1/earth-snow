@@ -99,7 +99,7 @@ public class PlaceHolderHelper {
    * 
    * @param value 需要转换的属性
    * @param properties 配置集合
-   * @return
+   * @return 替换后的字符串
    */
   public String replacePlaceholders(String value, final Properties properties) {
     Checks.notNull(properties, "'properties' must not be null");

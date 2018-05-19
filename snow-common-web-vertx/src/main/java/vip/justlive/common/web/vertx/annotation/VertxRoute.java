@@ -33,7 +33,7 @@ public @interface VertxRoute {
   /**
    * route的path
    * 
-   * @return
+   * @return path
    */
   String value() default "";
 }

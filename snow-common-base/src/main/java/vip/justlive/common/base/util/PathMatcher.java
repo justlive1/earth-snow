@@ -37,8 +37,8 @@ public class PathMatcher {
   /**
    * 是否是通配符
    * 
-   * @param path
-   * @return
+   * @param path 路径
+   * @return true 是通配符
    */
   public boolean isPattern(String path) {
     return (path.indexOf(ANY) != -1 || path.indexOf(ONLY_ONE) != -1);
@@ -47,9 +47,9 @@ public class PathMatcher {
   /**
    * 匹配路径
    * 
-   * @param pattern
-   * @param path
-   * @return
+   * @param pattern 匹配串
+   * @param path 路径
+   * @return true 匹配上了
    */
   public boolean match(String pattern, String path) {
     if (this.isPattern(pattern)) {
@@ -67,8 +67,8 @@ public class PathMatcher {
   /**
    * 将通配符表达式转化为正则表达式
    * 
-   * @param pattern
-   * @return
+   * @param pattern 匹配串
+   * @return 正则
    */
   private Pattern parsePattern(String pattern) {
     char[] chars = pattern.toCharArray();

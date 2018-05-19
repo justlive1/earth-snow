@@ -43,4 +43,9 @@ public class ErrorCodes {
   public static final ErrorCode TYPE_CANNOT_CONVERTER =
       Exceptions.errorMessage(MODULE, "00001", "[%]不能转换为[%s]类型");
 
+  /**
+   * 参数不能为空
+   */
+  public static final ErrorCode PARAM_CANNOT_NULL =
+      Exceptions.errorMessage(MODULE, "00002", "参数不能为空");
 }

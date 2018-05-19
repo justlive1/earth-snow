@@ -29,14 +29,14 @@ public interface SourceResource extends SourceStream {
   /**
    * 返回资源路径
    * 
-   * @return
+   * @return 资源路径
    */
   String path();
 
   /**
    * 是否存在
    * 
-   * @return
+   * @return 是否存在
    */
   default boolean exist() {
     try {
@@ -55,30 +55,32 @@ public interface SourceResource extends SourceStream {
   /**
    * 是否文件
    * 
-   * @return
+   * @return 是否是文件
    */
   boolean isFile();
 
   /**
    * 获取文件
    * 
-   * @return
+   * @return 文件
+   * @throws IOException io异常
    */
   File getFile() throws IOException;
 
   /**
    * 获取资源的URL
    * 
-   * @return
-   * @throws IOException
+   * @return URL
+   * @throws IOException io异常
    */
   URL getURL() throws IOException;
 
   /**
-   * 使用{@value path}创建相对路径的{@code SourceResource}
+   * 使用path创建相对路径的{@code SourceResource}
    * 
-   * @param path
-   * @return
+   * @param path 路径
+   * @return 源资源
+   * @throws IOException io异常
    */
   SourceResource createRelative(String path) throws IOException;
 }

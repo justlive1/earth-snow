@@ -38,7 +38,7 @@ public class FileSystemResource implements SourceResource {
   /**
    * 通过文件路径创建一个 {@code FileSystemResource}
    * 
-   * @param filePath
+   * @param filePath 文件路径
    */
   public FileSystemResource(String filePath) {
     Checks.notNull(filePath);
@@ -49,7 +49,7 @@ public class FileSystemResource implements SourceResource {
   /**
    * 通过{@link File}创建一个 {@code FileSystemResource}
    * 
-   * @param file
+   * @param file 文件
    */
   public FileSystemResource(File file) {
     Checks.notNull(file);
@@ -59,7 +59,7 @@ public class FileSystemResource implements SourceResource {
   /**
    * 通过{@link Path}创建一个 {@code FileSystemResource}
    * 
-   * @param path
+   * @param path 路径
    */
   public FileSystemResource(Path path) {
     Checks.notNull(path);
@@ -101,7 +101,7 @@ public class FileSystemResource implements SourceResource {
   /**
    * 获取文件Path
    * 
-   * @return
+   * @return Path
    */
   public Path getPath() {
     if (path == null) {

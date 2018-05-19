@@ -44,7 +44,7 @@ public class UserUtils {
   /**
    * 获取当前登陆用户名
    * 
-   * @return
+   * @return 登录用户名
    */
   public static String loginUserName() {
 

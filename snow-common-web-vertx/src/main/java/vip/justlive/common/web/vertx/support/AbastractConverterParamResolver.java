@@ -34,12 +34,18 @@ public abstract class AbastractConverterParamResolver implements MethodParamReso
 
   @SuppressWarnings("unchecked")
   protected <T> T converter(String source, Class<T> targetType) {
-    if (targetType == String.class) {
+    if (source == null || targetType == String.class) {
       return (T) source;
     }
     if (converterService.canConverter(String.class, targetType)) {
       return converterService.convert(source, targetType);
     }
     throw Exceptions.fail(ErrorCodes.TYPE_CANNOT_CONVERTER, source, targetType);
+  }
+
+  protected void checkRequire(ParamWrap wrap, Object value) {
+    if (wrap.isRequired() && value == null) {
+      throw Exceptions.fail(ErrorCodes.PARAM_CANNOT_NULL);
+    }
   }
 }

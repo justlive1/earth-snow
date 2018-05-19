@@ -119,7 +119,7 @@ public abstract class AbstractResourceLoader {
   /**
    * 获取资源列表
    * 
-   * @return
+   * @return 资源列表
    */
   public List<SourceResource> resources() {
     return this.resources;
@@ -128,9 +128,9 @@ public abstract class AbstractResourceLoader {
   /**
    * 获取资源Reader
    * 
-   * @param resource
-   * @return
-   * @throws IOException
+   * @param resource 源资源
+   * @return Reader
+   * @throws IOException io异常
    */
   protected Reader getReader(SourceResource resource) throws IOException {
     if (this.charset != null) {
@@ -144,6 +144,9 @@ public abstract class AbstractResourceLoader {
 
   /**
    * 解析路径
+   * 
+   * @param locations 路径
+   * @return 资源列表
    */
   protected List<SourceResource> parse(String... locations) {
     List<SourceResource> list = new LinkedList<>();
@@ -174,7 +177,9 @@ public abstract class AbstractResourceLoader {
   /**
    * 处理所有classpath下的资源
    * 
-   * @param location
+   * @param location 路径
+   * @return 资源列表
+   * @throws IOException io异常
    */
   protected List<SourceResource> resolveAllClassPathResource(String location) throws IOException {
     List<SourceResource> list = new LinkedList<>();
@@ -199,7 +204,9 @@ public abstract class AbstractResourceLoader {
   /**
    * 处理classpath下的资源
    * 
-   * @param location
+   * @param location 路径
+   * @return 资源列表
+   * @throws IOException io异常
    */
   protected List<SourceResource> resolveClassPathResource(String location) throws IOException {
     List<SourceResource> list = new LinkedList<>();
@@ -214,7 +221,9 @@ public abstract class AbstractResourceLoader {
   /**
    * 处理文件系统下的资源
    * 
-   * @param location
+   * @param location 路径
+   * @return 资源列表
+   * @throws IOException io异常
    */
   protected List<SourceResource> resolveFileSystemResource(String location) throws IOException {
     List<SourceResource> list = new LinkedList<>();
@@ -229,9 +238,9 @@ public abstract class AbstractResourceLoader {
   /**
    * 获取匹配的路径
    * 
-   * @param location
-   * @return
-   * @throws IOException
+   * @param location 路径
+   * @return 资源列表
+   * @throws IOException io异常
    */
   protected List<SourceResource> findMatchPath(String location) throws IOException {
     List<SourceResource> all = new LinkedList<>();
@@ -254,11 +263,11 @@ public abstract class AbstractResourceLoader {
   /**
    * 获取资源下匹配的jar中的文件
    * 
-   * @param resource
-   * @param rootUrl
-   * @param subPattern
-   * @return
-   * @throws IOException
+   * @param resource 源
+   * @param rootUrl 根路径
+   * @param subPattern 匹配串
+   * @return 资源列表
+   * @throws IOException io异常
    */
   protected List<SourceResource> findJarMatchPath(SourceResource resource, URL rootUrl,
       String subPattern) throws IOException {
@@ -304,13 +313,13 @@ public abstract class AbstractResourceLoader {
   /**
    * 查找jar中匹配的资源
    * 
-   * @param resource
-   * @param subPattern
-   * @param all
-   * @param jarFile
-   * @param jarFileUrl
-   * @param rootEntryPath
-   * @throws IOException
+   * @param resource 源
+   * @param subPattern 匹配串
+   * @param all 所有资源
+   * @param jarFile jar文件
+   * @param jarFileUrl jar文件路径
+   * @param rootEntryPath 根路径
+   * @throws IOException io异常
    */
   private void look(SourceResource resource, String subPattern, List<SourceResource> all,
       JarFile jarFile, String jarFileUrl, String rootEntryPath) throws IOException {
@@ -335,9 +344,9 @@ public abstract class AbstractResourceLoader {
   /**
    * 获取jar文件
    * 
-   * @param jarFileUrl
-   * @return
-   * @throws IOException
+   * @param jarFileUrl jar文件路径
+   * @return jar文件
+   * @throws IOException io异常
    */
   protected JarFile getJarFile(String jarFileUrl) throws IOException {
     if (jarFileUrl.startsWith(FILE_PREFIX)) {
@@ -356,9 +365,10 @@ public abstract class AbstractResourceLoader {
   /**
    * 获取资源下匹配的文件
    * 
-   * @param resource
-   * @param subPattern
-   * @return
+   * @param resource 源
+   * @param subPattern 匹配串
+   * @return 资源列表
+   * @throws IOException io异常
    */
   protected List<SourceResource> findFileMatchPath(SourceResource resource, String subPattern)
       throws IOException {
@@ -374,9 +384,9 @@ public abstract class AbstractResourceLoader {
   /**
    * 获取目录下匹配的文件
    * 
-   * @param rootDir
-   * @param subPattern
-   * @return
+   * @param rootDir 根目录
+   * @param subPattern 匹配串
+   * @return 文件列表
    */
   protected Set<File> findMatchedFiles(File rootDir, String subPattern) {
     Set<File> files = new LinkedHashSet<>();
@@ -399,9 +409,9 @@ public abstract class AbstractResourceLoader {
   /**
    * 递归查询匹配的文件
    * 
-   * @param fullPattern
-   * @param dir
-   * @param files
+   * @param fullPattern 全匹配串
+   * @param dir 目录
+   * @param files 文件集合
    */
   protected void searchMatchedFiles(String fullPattern, File dir, Set<File> files) {
     if (log.isDebugEnabled()) {
@@ -426,8 +436,8 @@ public abstract class AbstractResourceLoader {
   /**
    * 获取不含通配符的根路径
    * 
-   * @param location
-   * @return
+   * @param location 路径
+   * @return 根路径
    */
   protected String getRootDir(String location) {
     int prefixEnd = location.indexOf(BaseConstants.PROTOCOL_SEPARATOR) + 1;

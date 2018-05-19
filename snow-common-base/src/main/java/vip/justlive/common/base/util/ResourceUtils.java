@@ -26,11 +26,13 @@ import vip.justlive.common.base.constant.BaseConstants;
  */
 public class ResourceUtils {
 
+  ResourceUtils() {}
+
   /**
    * 判断URL是否是jar文件
    * 
-   * @param url
-   * @return
+   * @param url 路径
+   * @return true是jar文件
    */
   public static boolean isJarURL(URL url) {
     String protocol = url.getProtocol();
@@ -44,9 +46,9 @@ public class ResourceUtils {
   /**
    * String转换成URI
    * 
-   * @param url
-   * @return
-   * @throws URISyntaxException
+   * @param url 路径
+   * @return URI
+   * @throws URISyntaxException 转换不了URI抛出异常
    */
   public static URI toURI(String url) throws URISyntaxException {
     return new URI(url.replace(" ", "%20"));
@@ -55,9 +57,9 @@ public class ResourceUtils {
   /**
    * URL转换成URI
    * 
-   * @param url
-   * @return
-   * @throws URISyntaxException
+   * @param url 路径
+   * @return URI
+   * @throws URISyntaxException 转换不了URI抛出异常
    */
   public static URI toURI(URL url) throws URISyntaxException {
     return new URI(url.toString().replace(" ", "%20"));
@@ -66,9 +68,9 @@ public class ResourceUtils {
   /**
    * 获取相对资源路径
    * 
-   * @param rootPath
-   * @param relative
-   * @return
+   * @param rootPath 根路径
+   * @param relative 相对路径
+   * @return 路径
    */
   public static String relativePath(String rootPath, String relative) {
     int last = rootPath.lastIndexOf(BaseConstants.PATH_SEPARATOR);

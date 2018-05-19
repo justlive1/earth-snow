@@ -14,6 +14,7 @@
 package vip.justlive.common.web.vertx.support;
 
 import java.lang.reflect.Parameter;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import vip.justlive.common.web.vertx.annotation.VertxRequestBody;
 
@@ -38,7 +39,12 @@ public class RequestBodyResolver extends AbastractConverterParamResolver {
 
   @Override
   public Object render(ParamWrap wrap, RoutingContext ctx) {
-    return ctx.getBodyAsJson().mapTo(wrap.getClazz());
+    JsonObject value = ctx.getBodyAsJson();
+    this.checkRequire(wrap, value);
+    if (value != null) {
+      return value.mapTo(wrap.getClazz());
+    }
+    return value;
   }
 
 }

@@ -22,42 +22,42 @@ package vip.justlive.common.base.logger;
 public interface Track {
 
   /**
-   * 请求入口 -> access
+   * 请求入口 - access
    * 
-   * @param format
-   * @param args
+   * @param format 模板
+   * @param args 参数
    */
   void request(String format, Object... args);
 
   /**
-   * 请求返回 -> access
+   * 请求返回 - access
    * 
-   * @param format
-   * @param args
+   * @param format 模板
+   * @param args 参数
    */
   void response(String format, Object... args);
 
   /**
-   * 服务访问 -> service
+   * 服务访问 - service
    * 
-   * @param format
-   * @param args
+   * @param format 模板
+   * @param args 参数
    */
   void service(String format, Object... args);
 
   /**
-   * 网关访问 -> gateway
+   * 网关访问 - gateway
    * 
-   * @param format
-   * @param args
+   * @param format 模板
+   * @param args 参数
    */
   void gateway(String format, Object... args);
 
   /**
-   * 批处理 -> batch
+   * 批处理 - batch
    * 
-   * @param format
-   * @param args
+   * @param format 模板
+   * @param args 参数
    */
   void batch(String format, Object... args);
 

@@ -60,22 +60,22 @@ public class TrackImpl implements Track {
   protected static final Logger batch = LoggerFactory.getLogger("TRACK.BATCH");
 
   /**
-   * 是否开启访问日志 -> Controller
+   * 是否开启访问日志 - Controller
    */
   private boolean accessEnabled;
 
   /**
-   * 是否开启服务日志 -> Service
+   * 是否开启服务日志 - Service
    */
   private boolean serviceEnabled;
 
   /**
-   * 是否开启网关日志 -> Gateway
+   * 是否开启网关日志 - Gateway
    */
   private boolean gatewayEnabled;
 
   /**
-   * 是否开启批处理日志 -> Batch
+   * 是否开启批处理日志 - Batch
    */
   private boolean batchEnabled;
 

@@ -33,7 +33,7 @@ public @interface VertxRequestBody {
   /**
    * 是否必须
    * 
-   * @return
+   * @return true为必须
    */
   boolean required() default true;
 

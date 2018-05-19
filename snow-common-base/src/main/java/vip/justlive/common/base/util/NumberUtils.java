@@ -68,9 +68,10 @@ public class NumberUtils {
    * <p>
    * 支持十六进制 ("0x", "0X", "#").
    * 
-   * @param
-   * @param
-   * @return
+   * @param text 文本
+   * @param targetClass 目标类
+   * @param <T> 泛型类
+   * @return 转换后的类型
    * @throws IllegalArgumentException 当不上jdk标准的Number实现会抛出该异常
    */
   @SuppressWarnings("unchecked")
@@ -88,6 +89,9 @@ public class NumberUtils {
 
   /**
    * 判断是否是十六进制
+   * 
+   * @param value 校验值
+   * @return true 是十六进制
    */
   public static boolean isHexNumber(String value) {
     int index = (value.startsWith("-") ? 1 : 0);
@@ -98,6 +102,8 @@ public class NumberUtils {
   /**
    * 将字符串解析成BigInteger
    * 
+   * @param value 解析值
+   * @return 解析后的类型
    */
   public static BigInteger decodeBigInteger(String value) {
     int radix = 10;

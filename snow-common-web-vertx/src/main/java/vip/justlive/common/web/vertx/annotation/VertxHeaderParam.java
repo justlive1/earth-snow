@@ -33,14 +33,14 @@ public @interface VertxHeaderParam {
   /**
    * 参数名称
    * 
-   * @return
+   * @return 参数名称
    */
   String value() default "";
 
   /**
    * 是否必须
    * 
-   * @return
+   * @return true则为必填
    */
   boolean required() default true;
 }

@@ -20,8 +20,8 @@ import vip.justlive.common.base.convert.support.ConverterTypePair;
  * 
  * @author wubo
  *
- * @param <S>
- * @param <T>
+ * @param <S> 泛型类
+ * @param <T> 泛型类
  */
 public interface Converter<S, T> {
 
@@ -29,15 +29,15 @@ public interface Converter<S, T> {
   /**
    * 类型转换
    * 
-   * @param source
-   * @return
+   * @param source 源
+   * @return 转换类
    */
   T convert(S source);
 
   /**
    * 获取类型对
    * 
-   * @return
+   * @return 类型对
    */
   default ConverterTypePair pair() {
     return null;

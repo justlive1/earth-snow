@@ -37,7 +37,7 @@ public class CommonWebController {
   /**
    * 验证服务是否启动
    * 
-   * @return
+   * @return 检查字符串
    */
   @GetMapping("/checkWeb")
   public String checkWeb() {
@@ -47,7 +47,7 @@ public class CommonWebController {
   /**
    * 当前服务器毫秒值
    * 
-   * @return
+   * @return 当前时间
    */
   @GetMapping(value = "/currentTime", produces = "application/json; charset=UTF-8")
   public Response<Long> currentTime() {
@@ -57,7 +57,8 @@ public class CommonWebController {
   /**
    * 获取服务器日期 无时分秒
    * 
-   * @param offset
+   * @param offset 偏移量 与当前日期的偏移
+   * @return 服务器日期
    */
   @GetMapping(value = "/localDate", produces = "application/json; charset=UTF-8")
   public Response<Long> localDate(@RequestParam(defaultValue = "0") Integer offset) {
@@ -68,7 +69,8 @@ public class CommonWebController {
   /**
    * 获取服务器日期时间
    * 
-   * @param offset
+   * @param offset 偏移量 与当前日期的偏移
+   * @return 服务器日期时间
    */
   @GetMapping(value = "/localDateTime", produces = "application/json; charset=UTF-8")
   public Response<Long> localDateTime(@RequestParam(defaultValue = "0") Integer offset) {
@@ -79,7 +81,7 @@ public class CommonWebController {
   /**
    * 获取系统配置参数
    * 
-   * @return
+   * @return 系统配置参数
    */
   @GetMapping(value = "/systemProperties", produces = "application/json; charset=UTF-8")
   public Response<Properties> systemProperties() {

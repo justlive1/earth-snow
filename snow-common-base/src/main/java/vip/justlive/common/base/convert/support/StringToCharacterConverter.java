@@ -17,7 +17,7 @@ import vip.justlive.common.base.convert.Converter;
 
 /**
  * 
- * String -> Character转换器
+ * String - Character转换器
  * 
  * @author wubo
  *

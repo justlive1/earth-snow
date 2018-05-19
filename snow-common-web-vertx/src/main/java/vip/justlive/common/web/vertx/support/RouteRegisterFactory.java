@@ -90,7 +90,7 @@ public class RouteRegisterFactory {
   /**
    * 解析{@code VertxRoute}注解的route类
    * 
-   * @param clazz
+   * @param clazz 类
    */
   private void parseVertxRoute(Class<?> clazz) {
 
@@ -118,9 +118,9 @@ public class RouteRegisterFactory {
   /**
    * 解析{@code VertxRoute}注解类下注解了{@code VertxRouteMapping}的方法
    * 
-   * @param root
-   * @param method
-   * @param bean
+   * @param root 根路径
+   * @param method 方法
+   * @param bean 实例
    */
   private void parseVertxRouteMapping(String root, Method method, Object bean) {
 
@@ -156,8 +156,8 @@ public class RouteRegisterFactory {
   /**
    * 解析方法上使用了注解的参数
    * 
-   * @param parameters
-   * @return
+   * @param parameters 参数
+   * @return 参数包装
    */
   private ParamWrap[] parseVertxRouterParamters(Parameter[] parameters) {
 
@@ -204,8 +204,8 @@ public class RouteRegisterFactory {
   /**
    * 绑定参数到Route上下文的方法
    * 
-   * @param wrap
-   * @param ctx
+   * @param wrap 路由包装
+   * @param ctx 路由上下文
    */
   private void executeWithArgs(RouteWrap wrap, RoutingContext ctx) {
 
@@ -229,8 +229,8 @@ public class RouteRegisterFactory {
   /**
    * 处理uri，将首个/去除
    * 
-   * @param uri
-   * @return
+   * @param uri 请求路径
+   * @return 处理后的路径
    */
   private static String transferUri(String uri) {
     if (uri.startsWith(BaseConstants.ROOT_PATH)) {

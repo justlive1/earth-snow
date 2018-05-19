@@ -28,15 +28,15 @@ public interface PropertySource {
   /**
    * 获取属性集合
    * 
-   * @return
+   * @return 属性集合
    */
   Properties props();
 
   /**
    * 获取属性
    * 
-   * @param key
-   * @return
+   * @param key 属性键值
+   * @return 属性值
    */
   default String getProperty(String key) {
     String value = props().getProperty(key);
@@ -49,9 +49,9 @@ public interface PropertySource {
   /**
    * 获取属性，可设置默认值
    * 
-   * @param key
-   * @param defaultValue
-   * @return
+   * @param key 属性键值
+   * @param defaultValue 默认值
+   * @return 属性值
    */
   default String getProperty(String key, String defaultValue) {
     String value = props().getProperty(key, defaultValue);

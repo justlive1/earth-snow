@@ -39,7 +39,7 @@ public class UrlResource implements SourceResource {
   /**
    * 使用{@code URL}创建{@code UrlResource}
    * 
-   * @param url
+   * @param url URL
    */
   public UrlResource(URL url) {
     this.url = Checks.notNull(url);

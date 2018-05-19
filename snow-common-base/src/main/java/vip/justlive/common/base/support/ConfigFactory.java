@@ -81,7 +81,7 @@ public class ConfigFactory {
   /**
    * 加载配置文件
    * 
-   * @param locations
+   * @param locations 路径
    */
   public static void loadProperties(String... locations) {
     loadProperties(StandardCharsets.UTF_8, true, locations);
@@ -90,9 +90,9 @@ public class ConfigFactory {
   /**
    * 加载配置文件，设置编码和忽略找不到的资源
    * 
-   * @param charset
-   * @param ignoreNotFound
-   * @param locations
+   * @param charset 字符集
+   * @param ignoreNotFound 忽略未找到
+   * @param locations 路径
    */
   public static void loadProperties(Charset charset, boolean ignoreNotFound, String... locations) {
     PropertiesLoader loader = new PropertiesLoader(locations);
@@ -104,7 +104,7 @@ public class ConfigFactory {
   /**
    * 加载配置文件，传入配置属性资源
    * 
-   * @param source
+   * @param source 属性源
    */
   public static void loadProperties(PropertySource source) {
     PROPS.putAll(source.props());
@@ -113,8 +113,8 @@ public class ConfigFactory {
   /**
    * 获取配置属性
    * 
-   * @param key
-   * @return
+   * @param key 属性键值
+   * @return 属性值
    */
   public static String getProperty(String key) {
     return SOURCE_WRAPPER.getProperty(key);
@@ -123,8 +123,9 @@ public class ConfigFactory {
   /**
    * 获取配置属性，可设置默认值
    * 
-   * @param key
-   * @return
+   * @param key 属性键值
+   * @param defaultValue 默认值
+   * @return 属性值
    */
   public static String getProperty(String key, String defaultValue) {
     return SOURCE_WRAPPER.getProperty(key, defaultValue);
@@ -133,8 +134,9 @@ public class ConfigFactory {
   /**
    * 加载配置类，需要有{@link Value}注解
    * 
-   * @param clazz
-   * @return
+   * @param clazz 类
+   * @param <T> 泛型类
+   * @return 配置类
    */
   public static <T> T load(Class<T> clazz) {
     Object obj = FACTORY.get(clazz);
@@ -153,8 +155,9 @@ public class ConfigFactory {
   /**
    * 解析
    * 
-   * @param clazz
-   * @return
+   * @param clazz 类
+   * @param <T> 泛型类
+   * @return 配置类
    */
   protected static <T> T parse(Class<T> clazz) {
     Field[] fields = ReflectUtils.getAllDeclaredFields(clazz);

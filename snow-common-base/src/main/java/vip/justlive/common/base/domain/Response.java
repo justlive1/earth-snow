@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
  * json返回实体
  * 
  * @author wubo
- *
+ * @param <T> 泛型类
  */
 @Data
 @NoArgsConstructor
@@ -46,8 +46,9 @@ public class Response<T> {
   /**
    * 成功返回
    * 
-   * @param data
-   * @return
+   * @param data 数据
+    * @param <E> 泛型类
+   * @return 返回实体
    */
   public static <E> Response<E> success(E data) {
     Response<E> resp = new Response<>();
@@ -59,7 +60,8 @@ public class Response<T> {
   /**
    * 失败返回
    * 
-   * @return
+   * @param message 消息
+   * @return 返回实体
    */
   public static Response<Void> error(String message) {
     Response<Void> resp = new Response<>();
@@ -71,7 +73,7 @@ public class Response<T> {
   /**
    * 是否成功
    * 
-   * @return
+   * @return 是否成功
    */
   public boolean isSuccess() {
     return SUCC.equals(code);

@@ -45,6 +45,10 @@ public class Checks {
 
   /**
    * 非空检查
+   * 
+   * @param obj 校验值
+   * @param <T> 泛型类
+   * @return 传入值
    */
   public static <T> T notNull(T obj) {
     return notNull(obj, "can not be null");

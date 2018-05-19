@@ -40,7 +40,7 @@ public class ClassPathResource implements SourceResource {
    * 创建一个{@code ClassPathResource}<br>
    * classloader为null可能资源访问不了
    * 
-   * @param path
+   * @param path 路径
    */
   public ClassPathResource(String path) {
     this(path, (ClassLoader) null);
@@ -49,8 +49,8 @@ public class ClassPathResource implements SourceResource {
   /**
    * 使用{@code ClassLoader}创建{@code ClassPathResource}
    * 
-   * @param path
-   * @param classLoader
+   * @param path 路径
+   * @param classLoader 类加载器
    */
   public ClassPathResource(String path, ClassLoader classLoader) {
     this.path = this.cutRootPath(Checks.notNull(path));
@@ -60,8 +60,8 @@ public class ClassPathResource implements SourceResource {
   /**
    * 使用{@code Class}创建{@code ClassPathResource}
    * 
-   * @param path
-   * @param clazz
+   * @param path 路径
+   * @param clazz 类
    */
   public ClassPathResource(String path, Class<?> clazz) {
     this.path = this.cutRootPath(Checks.notNull(path));
@@ -71,8 +71,8 @@ public class ClassPathResource implements SourceResource {
   /**
    * 去除路径起始的/
    * 
-   * @param path
-   * @return
+   * @param path 路径
+   * @return 处理后的路径
    */
   String cutRootPath(String path) {
     String usePath = path;
@@ -127,7 +127,7 @@ public class ClassPathResource implements SourceResource {
   /**
    * 获取类加载器
    * 
-   * @return
+   * @return 类加载器
    */
   public ClassLoader getClassLoader() {
     if (this.clazz != null) {
@@ -149,7 +149,7 @@ public class ClassPathResource implements SourceResource {
   /**
    * 获取资源URL
    * 
-   * @return
+   * @return URL
    *
    */
   @Override

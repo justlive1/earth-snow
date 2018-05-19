@@ -108,8 +108,8 @@ public class CodedExceptionResolver extends SimpleMappingExceptionResolver {
   /**
    * 判断一个请求是否支持Json方式的返回
    * 
-   * @param request
-   * @return
+   * @param request 请求
+   * @return true是支持json方式返回
    */
   protected boolean isJsonResponseSupported(HttpServletRequest request) {
     // 检查是否有Accept头
@@ -133,8 +133,8 @@ public class CodedExceptionResolver extends SimpleMappingExceptionResolver {
   /**
    * 根据CodedException创建返回对象
    * 
-   * @param ex
-   * @return
+   * @param ex 包装异常
+   * @return 返回对象
    */
   private Map<String, Object> buildError(CodedException ex) {
     Map<String, Object> err = Maps.newHashMap();
@@ -147,8 +147,8 @@ public class CodedExceptionResolver extends SimpleMappingExceptionResolver {
   /**
    * 包装普通的Exception
    * 
-   * @param ex
-   * @return
+   * @param ex 异常
+   * @return 返回对象
    */
   private Map<String, Object> buildError(Exception ex) {
     Map<String, Object> err = Maps.newHashMap();

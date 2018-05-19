@@ -33,7 +33,7 @@ public @interface Value {
   /**
    * 表达式，例如：${attrs.key}
    * 
-   * @return
+   * @return 表达式
    */
   String value();
 }

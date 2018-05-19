@@ -33,14 +33,14 @@ public @interface VertxRouteMapping {
   /**
    * 地址映射 (e.g. "/myPath.do").
    * 
-   * @return
+   * @return 请求地址
    */
   String[] value() default {};
 
   /**
    * HTTP请求类型 :GET, POST, HEAD, OPTIONS, PUT, PATCH, DELETE, TRACE.
    * 
-   * @return
+   * @return 请求类型
    */
   HttpMethod[] method() default {};
 
@@ -52,7 +52,7 @@ public @interface VertxRouteMapping {
    * consumes = {"text/plain", "application/*"}
    * </pre>
    * 
-   * @return
+   * @return Content-Type
    */
   String[] consumes() default {};
 
@@ -66,12 +66,14 @@ public @interface VertxRouteMapping {
    * produces = "application/json; charset=UTF-8"
    * </pre>
    * 
-   * @return
+   * @return Accept
    */
   String[] produces() default {};
 
   /**
    * 是否使用阻塞方式
+   * 
+   * @return true为阻塞方式
    */
   boolean blocking() default false;
 }

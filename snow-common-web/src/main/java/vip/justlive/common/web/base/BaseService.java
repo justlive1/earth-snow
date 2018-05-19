@@ -50,7 +50,7 @@ public abstract class BaseService {
    * }
    * </pre>
    * 
-   * @param template
+   * @param template rest模板
    */
   protected void setTemplate(RestTemplate template) {
     this.template = template;
@@ -59,8 +59,9 @@ public abstract class BaseService {
   /**
    * 构造json请求体
    * 
-   * @param request
-   * @return
+   * @param request 请求类
+   * @param <T> 泛型类
+   * @return json请求体
    */
   protected <T> HttpEntity<T> buildEntity(T request) {
 
@@ -73,8 +74,8 @@ public abstract class BaseService {
   /**
    * 构造表单提交请求体
    * 
-   * @param request
-   * @return
+   * @param request 请求
+   * @return 表单请求体
    */
   protected HttpEntity<Object> buildFormEntity(Object request) {
 
@@ -104,7 +105,8 @@ public abstract class BaseService {
    * 
    * @param url 请求地址
    * @param uriVariables uri中的参数
-   * @return
+   * @param <T> 泛型类
+   * @return 转换后的类型
    */
   protected <T> T getForObject(String url, Object... uriVariables) {
 
@@ -125,7 +127,9 @@ public abstract class BaseService {
    * @param url 请求地址
    * @param request 请求body中的数据（可空）
    * @param uriVariables uri中的参数
-   * @return
+   * @param <T> 泛型类
+   * @param <E> 泛型类
+   * @return 转换后的类型
    */
   protected <T, E> T postJsonForObject(String url, @Nullable E request, Object... uriVariables) {
 
@@ -148,7 +152,9 @@ public abstract class BaseService {
    * @param url 请求地址
    * @param request 请求body中的数据（可空）
    * @param uriVariables uri中的参数
-   * @return
+   * @param <T> 泛型类
+   * @param <E> 泛型类
+   * @return 转换后的类型
    */
   protected <T, E> T formSubmitForObject(String url, @Nullable E request, Object... uriVariables) {
 
@@ -168,7 +174,8 @@ public abstract class BaseService {
   /**
    * 检查返回值
    * 
-   * @param resp
+   * @param resp 返回响应
+   * @param <T> 泛型类
    */
   protected <T> void check(ResponseEntity<Response<T>> resp) {
 

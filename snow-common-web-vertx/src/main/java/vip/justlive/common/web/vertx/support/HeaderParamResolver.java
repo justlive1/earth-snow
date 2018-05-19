@@ -38,7 +38,9 @@ public class HeaderParamResolver extends AbastractConverterParamResolver {
 
   @Override
   public Object render(ParamWrap wrap, RoutingContext ctx) {
-    return converter(ctx.request().getHeader(wrap.getValue()), wrap.getClazz());
+    String value = ctx.request().getHeader(wrap.getValue());
+    this.checkRequire(wrap, value);
+    return converter(value, wrap.getClazz());
   }
 
 }

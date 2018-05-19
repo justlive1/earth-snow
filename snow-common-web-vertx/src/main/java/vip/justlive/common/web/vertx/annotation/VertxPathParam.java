@@ -33,14 +33,14 @@ public @interface VertxPathParam {
   /**
    * 参数名称
    * 
-   * @return
+   * @return 参数名
    */
   String value() default "";
 
   /**
    * 是否必须
    * 
-   * @return
+   * @return true为必须
    */
   boolean required() default true;
 }

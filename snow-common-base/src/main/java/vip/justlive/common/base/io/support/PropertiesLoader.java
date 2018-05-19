@@ -42,7 +42,7 @@ public class PropertiesLoader extends AbstractResourceLoader implements Property
   /**
    * 使用路径创建{@code PropertiesLoader}
    * 
-   * @param locations
+   * @param locations 路径
    */
   public PropertiesLoader(String... locations) {
     this(ClassLoader.getSystemClassLoader(), locations);
@@ -51,8 +51,8 @@ public class PropertiesLoader extends AbstractResourceLoader implements Property
   /**
    * 使用路径创建{@code PropertiesLoader}
    * 
-   * @param loader
-   * @param locations
+   * @param loader 类加载器
+   * @param locations 路径
    */
   public PropertiesLoader(ClassLoader loader, String... locations) {
     this.locations = locations;
@@ -62,7 +62,7 @@ public class PropertiesLoader extends AbstractResourceLoader implements Property
   /**
    * 获取属性值
    * 
-   * @return
+   * @return 属性集合
    */
   public Properties props() {
     if (!this.ready) {

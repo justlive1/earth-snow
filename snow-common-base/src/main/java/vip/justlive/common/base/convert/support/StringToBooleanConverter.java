@@ -18,7 +18,7 @@ import com.google.common.collect.ImmutableSet;
 import vip.justlive.common.base.convert.Converter;
 
 /**
- * String -> Boolean 转换器<br>
+ * String - Boolean 转换器<br>
  * 注意: null和空字符串被解析为false
  * 
  * 
