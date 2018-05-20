@@ -7,6 +7,28 @@
 - snow-common-base J2SE基础
 - snow-common-web J2EE基础
 - snow-common-web-vertx Vertx Web扩展
+- 依赖方式
+
+```
+<dependency>
+    <groupId>vip.justlive</groupId>
+    <artifactId>snow-common-base</artifactId>
+    <version>1.0.0</version>
+</dependency>
+
+<dependency>
+    <groupId>vip.justlive</groupId>
+    <artifactId>snow-common-web</artifactId>
+    <version>1.0.0</version>
+</dependency>
+
+<dependency>
+    <groupId>vip.justlive</groupId>
+    <artifactId>snow-common-web-vertx</artifactId>
+    <version>1.0.0</version>
+</dependency>
+
+```
 
 
 ## 特性
