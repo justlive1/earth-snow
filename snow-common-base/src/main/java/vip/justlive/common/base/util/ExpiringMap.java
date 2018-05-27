@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -32,21 +33,57 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 /**
- * 有失效时间的 Map，每个
- *
+ * 有失效时间的 Map，可对每个键值对设置失效时间
+ * <p>
+ * Example usages:
+ * 
+ * <pre>
+ * {@code
+ * Map<String, Integer> map = ExpiringMap.<String, Integer>builder()
+ *       .expiration(30, TimeUnit.SECONDS).expiringPolicy(ExpiringPolicy.ACCESSED)
+ *       .cleanPolicy(CleanPolicy.ACCUMULATE).accumulateThreshold(50).build();
+ * 
+ * Map<String, Integer> map = ExpiringMap.<String, Integer>builder()
+ *       .expiration(30, TimeUnit.SECONDS).expiringPolicy(ExpiringPolicy.CREATED)
+ *       .cleanPolicy(CleanPolicy.SCHEDULE).scheduleDelay(60).build();
+ * }
+ * </pre>
+ * 
  * @author wubo
  */
 public class ExpiringMap<K, V> implements ConcurrentMap<K, V>, Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-  private final Lock readLock = readWriteLock.readLock();
-  private final Lock writeLock = readWriteLock.writeLock();
-  private ScheduledExecutorService executorService;
+  private final transient ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+  private final transient Lock readLock = readWriteLock.readLock();
+  private final transient Lock writeLock = readWriteLock.writeLock();
+  private transient ScheduledExecutorService executorService;
+  private final transient AtomicLong accumulate = new AtomicLong();
+
+  /**
+   * 失效策略
+   * 
+   * @author wubo
+   *
+   */
+  public enum ExpiringPolicy {
+    /**
+     * 创建后duration失效
+     * 
+     */
+    CREATED,
+    /**
+     * 访问键值刷新duration
+     */
+    ACCESSED;
+  }
+
 
   /**
    * 失效清除策略
+   * 
+   * @author wubo
    */
   public enum CleanPolicy {
     /**
@@ -59,10 +96,11 @@ public class ExpiringMap<K, V> implements ConcurrentMap<K, V>, Serializable {
     ACCUMULATE;
   }
 
+
   /**
    * 失效监听
    */
-  private List<ExpiredListener<K, V>> asyncExpiredListeners;
+  private transient List<ExpiredListener<K, V>> asyncExpiredListeners;
 
   /**
    * 最大数量
@@ -80,9 +118,24 @@ public class ExpiringMap<K, V> implements ConcurrentMap<K, V>, Serializable {
   private TimeUnit timeUnit;
 
   /**
+   * 失效策略
+   */
+  private ExpiringPolicy expiringPolicy;
+
+  /**
    * 失效清除策略
    */
   private CleanPolicy cleanPolicy;
+
+  /**
+   * 定时清理延迟
+   */
+  private int scheduleDelay;
+
+  /**
+   * 累积阈值
+   */
+  private int accumulateThreshold;
 
   /**
    * 实际数据
@@ -100,6 +153,9 @@ public class ExpiringMap<K, V> implements ConcurrentMap<K, V>, Serializable {
     duration = builder.duration;
     timeUnit = builder.timeUnit;
     cleanPolicy = builder.cleanPolicy;
+    expiringPolicy = builder.expiringPolicy;
+    scheduleDelay = builder.scheduleDelay;
+    accumulateThreshold = builder.accumulateThreshold;
     runCleanPolicy();
     data = new TreeMap<>();
   }
@@ -120,6 +176,20 @@ public class ExpiringMap<K, V> implements ConcurrentMap<K, V>, Serializable {
    */
   public static <K, V> ExpiringMap<K, V> create() {
     return ExpiringMap.<K, V>builder().build();
+  }
+
+  /**
+   * 真实数量
+   * 
+   * @return 数量
+   */
+  public int realSize() {
+    try {
+      readLock.lock();
+      return data.size();
+    } finally {
+      readLock.unlock();
+    }
   }
 
   @Override
@@ -162,15 +232,19 @@ public class ExpiringMap<K, V> implements ConcurrentMap<K, V>, Serializable {
       if (value == null || value.isExpired()) {
         return null;
       }
+      accessRecord(value);
       return value.value;
     } finally {
       readLock.unlock();
-      accessRecord();
+      record();
     }
   }
 
   @Override
   public V put(K key, V value) {
+    if (duration > 0) {
+      return put(key, value, duration);
+    }
     return put(key, value, ExpiringValue.NOT_EXPIRED);
   }
 
@@ -200,13 +274,17 @@ public class ExpiringMap<K, V> implements ConcurrentMap<K, V>, Serializable {
       writeLock.lock();
       ExpiringValue<V> wrapValue = new ExpiringValue<>(value, duration, timeUnit);
       ExpiringValue<V> preValue = data.put(key, wrapValue);
+      if (data.size() > maxSize) {
+        K k = data.firstKey();
+        data.remove(k);
+      }
       if (preValue != null && !preValue.isExpired()) {
         return preValue.value;
       }
       return null;
     } finally {
       writeLock.unlock();
-      createRecord();
+      record();
     }
   }
 
@@ -235,7 +313,7 @@ public class ExpiringMap<K, V> implements ConcurrentMap<K, V>, Serializable {
       data.putAll(map);
     } finally {
       writeLock.unlock();
-      createRecord();
+      record();
     }
   }
 
@@ -254,8 +332,7 @@ public class ExpiringMap<K, V> implements ConcurrentMap<K, V>, Serializable {
     try {
       readLock.lock();
       return data.entrySet().parallelStream().filter(r -> !r.getValue().isExpired())
-          .map(r -> r.getKey()).collect(
-              Collectors.toSet());
+          .map(r -> r.getKey()).collect(Collectors.toSet());
     } finally {
       readLock.unlock();
     }
@@ -265,8 +342,8 @@ public class ExpiringMap<K, V> implements ConcurrentMap<K, V>, Serializable {
   public Collection<V> values() {
     try {
       readLock.lock();
-      return data.values().parallelStream().filter(r -> !r.isExpired()).map(r -> r.value).collect(
-          Collectors.toList());
+      return data.values().parallelStream().filter(r -> !r.isExpired()).map(r -> r.value)
+          .collect(Collectors.toList());
     } finally {
       readLock.unlock();
     }
@@ -277,7 +354,7 @@ public class ExpiringMap<K, V> implements ConcurrentMap<K, V>, Serializable {
     try {
       readLock.lock();
       return data.entrySet().parallelStream().filter(r -> !r.getValue().isExpired())
-          .map(r -> new Entry<>(r.getKey(), r.getValue().value)).collect(Collectors.toSet());
+          .map(r -> new MapEntry<>(r.getKey(), r.getValue().value)).collect(Collectors.toSet());
     } finally {
       readLock.unlock();
     }
@@ -311,16 +388,29 @@ public class ExpiringMap<K, V> implements ConcurrentMap<K, V>, Serializable {
     return null;
   }
 
-  private void createRecord() {
-    // TODO
+  private void record() {
+    accumulate.getAndIncrement();
+    checkAccumulate();
   }
 
-  private void accessRecord() {
-    // TODO
+  private void accessRecord(ExpiringValue<V> value) {
+    if (expiringPolicy == ExpiringPolicy.ACCESSED) {
+      value.expireAt = System.currentTimeMillis() + value.duration;
+    }
+  }
+
+  private void checkAccumulate() {
+    if (cleanPolicy == CleanPolicy.ACCUMULATE && accumulate.get() % accumulateThreshold == 0) {
+      runAccumulateCleanPolicy();
+    }
   }
 
   private void runCleanPolicy() {
-
+    executorService = new ScheduledThreadPoolExecutor(1, new BasicThreadFactory.Builder()
+        .namingPattern("ExpiringMap-Clean-Pool-%d").daemon(true).build());
+    if (cleanPolicy == CleanPolicy.SCHEDULE) {
+      runScheduleCleanPolicy();
+    }
   }
 
   private void expiredClean() {
@@ -342,17 +432,19 @@ public class ExpiringMap<K, V> implements ConcurrentMap<K, V>, Serializable {
 
   private void notifyListener(K key, V value) {
     if (asyncExpiredListeners != null && !asyncExpiredListeners.isEmpty()) {
-      for (ExpiredListener listener : asyncExpiredListeners) {
+      for (ExpiredListener<K, V> listener : asyncExpiredListeners) {
         listener.expire(key, value);
       }
     }
   }
 
   private void runScheduleCleanPolicy() {
-    executorService =
-        new ScheduledThreadPoolExecutor(1, new BasicThreadFactory.Builder()
-            .namingPattern("ExpiringMap-Clean-Pool-%d").daemon(true).build());
-    executorService.scheduleWithFixedDelay(() -> expiredClean(),  60, 60, TimeUnit.SECONDS);
+    executorService.scheduleWithFixedDelay(() -> expiredClean(), scheduleDelay, scheduleDelay,
+        TimeUnit.SECONDS);
+  }
+
+  private void runAccumulateCleanPolicy() {
+    executorService.execute(() -> expiredClean());
   }
 
   /**
@@ -386,10 +478,12 @@ public class ExpiringMap<K, V> implements ConcurrentMap<K, V>, Serializable {
     private int maxSize = Integer.MAX_VALUE;
     private long duration = -1;
     private TimeUnit timeUnit = TimeUnit.SECONDS;
+    private ExpiringPolicy expiringPolicy = ExpiringPolicy.CREATED;
     private CleanPolicy cleanPolicy = CleanPolicy.ACCUMULATE;
+    private int scheduleDelay = 60;
+    private int accumulateThreshold = 50;
 
-    private Builder() {
-    }
+    private Builder() {}
 
     /**
      * 设置最大数量
@@ -450,6 +544,58 @@ public class ExpiringMap<K, V> implements ConcurrentMap<K, V>, Serializable {
     }
 
     /**
+     * 设置失效策略
+     * 
+     * @param expiringPolicy 失效策略
+     * @return 构造器
+     */
+    public Builder<K, V> expiringPolicy(ExpiringPolicy expiringPolicy) {
+      Checks.notNull(expiringPolicy, "expiringPolicy can not be null");
+      this.expiringPolicy = expiringPolicy;
+      return this;
+    }
+
+    /**
+     * 设置失效清理策略
+     * 
+     * @param cleanPolicy 失效清理策略
+     * @return 构造器
+     */
+    public Builder<K, V> cleanPolicy(CleanPolicy cleanPolicy) {
+      Checks.notNull(cleanPolicy, "cleanPolicy can not be null");
+      this.cleanPolicy = cleanPolicy;
+      return this;
+    }
+
+    /**
+     * 设置定时清理的延迟
+     * 
+     * @param scheduleDelay 延迟
+     * @return 构造器
+     */
+    public Builder<K, V> scheduleDelay(int scheduleDelay) {
+      if (scheduleDelay <= 0) {
+        throw new IllegalArgumentException("scheduleDelay should be positive");
+      }
+      this.scheduleDelay = scheduleDelay;
+      return this;
+    }
+
+    /**
+     * 设置累积阈值
+     *
+     * @param accumulateThreshold 阈值
+     * @return 构造器
+     */
+    public Builder<K, V> accumulateThreshold(int accumulateThreshold) {
+      if (accumulateThreshold <= 0) {
+        throw new IllegalArgumentException("accumulateThreshold should be positive");
+      }
+      this.accumulateThreshold = accumulateThreshold;
+      return this;
+    }
+
+    /**
      * 构造ExpiringMap
      *
      * @return ExpiringMap
@@ -482,6 +628,11 @@ public class ExpiringMap<K, V> implements ConcurrentMap<K, V>, Serializable {
     private long expireAt;
 
     /**
+     * 期限
+     */
+    private long duration;
+
+    /**
      * 构造不过期的包装
      *
      * @param value 值
@@ -501,7 +652,8 @@ public class ExpiringMap<K, V> implements ConcurrentMap<K, V>, Serializable {
     ExpiringValue(V value, long duration, TimeUnit timeUnit) {
       this.value = value;
       if (duration > 0) {
-        this.expireAt = System.currentTimeMillis() + timeUnit.toMillis(duration);
+        this.duration = timeUnit.toMillis(duration);
+        this.expireAt = System.currentTimeMillis() + this.duration;
       } else {
         this.expireAt = NOT_EXPIRED;
       }
@@ -518,12 +670,12 @@ public class ExpiringMap<K, V> implements ConcurrentMap<K, V>, Serializable {
 
   }
 
-  static final class Entry<K, V> implements Map.Entry<K, V> {
+  static final class MapEntry<K, V> implements Map.Entry<K, V> {
 
     K key;
     V value;
 
-    Entry(K key, V value) {
+    MapEntry(K key, V value) {
       this.key = key;
       this.value = value;
     }
