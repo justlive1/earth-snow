@@ -47,7 +47,7 @@ public class Response<T> {
    * 成功返回
    * 
    * @param data 数据
-    * @param <E> 泛型类
+   * @param <E> 泛型类
    * @return 返回实体
    */
   public static <E> Response<E> success(E data) {
@@ -66,6 +66,20 @@ public class Response<T> {
   public static Response<Void> error(String message) {
     Response<Void> resp = new Response<>();
     resp.setCode(FAIL);
+    resp.setMessage(message);
+    return resp;
+  }
+
+  /**
+   * 失败返回
+   * 
+   * @param code 编码
+   * @param message 消息
+   * @return 返回实体
+   */
+  public static Response<Void> error(String code, String message) {
+    Response<Void> resp = new Response<>();
+    resp.setCode(code);
     resp.setMessage(message);
     return resp;
   }
