@@ -72,9 +72,14 @@ public class RouteRegisterFactory {
   /**
    * 执行route的解析和注册
    */
-  public void execute() {
+  public void execute(String... basePackage) {
 
-    Reflections rel = new Reflections();
+    Reflections rel;
+    if (basePackage != null && basePackage.length > 0) {
+      rel = new Reflections("vip.justlive.common.web.vertx", basePackage);
+    } else {
+      rel = new Reflections();
+    }
     Set<Class<?>> classes = rel.getTypesAnnotatedWith(VertxRoute.class);
 
     for (Class<?> clazz : classes) {

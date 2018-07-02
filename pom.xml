@@ -5,7 +5,7 @@
 
 	<groupId>vip.justlive</groupId>
 	<artifactId>snow</artifactId>
-	<version>1.1.0</version>
+	<version>1.1.1</version>
 	<packaging>pom</packaging>
 
 	<name>snow</name>
