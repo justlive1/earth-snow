@@ -7,25 +7,32 @@
 - snow-common-base J2SE基础
 - snow-common-web J2EE基础
 - snow-common-web-vertx Vertx Web扩展
+- snow-common-spring-rabbit spring-rabbit封装
 - 依赖方式
 
 ```
 <dependency>
     <groupId>vip.justlive</groupId>
     <artifactId>snow-common-base</artifactId>
-    <version>1.0.0</version>
+    <version>${snow.version}</version>
 </dependency>
 
 <dependency>
     <groupId>vip.justlive</groupId>
     <artifactId>snow-common-web</artifactId>
-    <version>1.0.0</version>
+    <version>${snow.version}</version>
 </dependency>
 
 <dependency>
     <groupId>vip.justlive</groupId>
     <artifactId>snow-common-web-vertx</artifactId>
-    <version>1.0.0</version>
+    <version>${snow.version}</version>
+</dependency>
+
+<dependency>
+    <groupId>vip.justlive</groupId>
+    <artifactId>snow-common-web-vertx</artifactId>
+    <version>${snow.version}</version>
 </dependency>
 
 ```
@@ -52,6 +59,9 @@
 		
 	snow-common-web-vertx
 		扩展Route增加注解实现
+		
+	snow-common-spring-rabbit
+		spring-rabbit的封装
 		
 
 ## 部署

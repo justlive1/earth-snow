@@ -71,6 +71,8 @@ public class RouteRegisterFactory {
 
   /**
    * 执行route的解析和注册
+   * 
+   * @param basePackage 扫描包路径
    */
   public void execute(String... basePackage) {
 

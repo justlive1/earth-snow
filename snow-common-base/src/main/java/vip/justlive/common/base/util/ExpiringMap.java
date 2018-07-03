@@ -179,7 +179,7 @@ public class ExpiringMap<K, V> implements ConcurrentMap<K, V>, Serializable {
    * 
    * @param <K> 泛型类
    * @param <V> 泛型类
-   * @return
+   * @return ExpiringMap
    */
   public static <K, V> ExpiringMap<K, V> create() {
     return ExpiringMap.<K, V>builder().build();

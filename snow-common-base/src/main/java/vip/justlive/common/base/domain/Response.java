@@ -61,6 +61,7 @@ public class Response<T> {
    * 失败返回
    * 
    * @param message 消息
+   * @param <T> 泛型类
    * @return 返回实体
    */
   public static <T> Response<T> error(String message) {
@@ -75,6 +76,7 @@ public class Response<T> {
    * 
    * @param code 编码
    * @param message 消息
+   * @param <T> 泛型类
    * @return 返回实体
    */
   public static <T> Response<T> error(String code, String message) {

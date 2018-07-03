@@ -13,7 +13,7 @@
 	<packaging>jar</packaging>
 
 	<name>snow-common-base</name>
-	<url>https://gitee.com/justlive1/earth</url>
+	<url>https://github.com/justlive1/earth-snow</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>

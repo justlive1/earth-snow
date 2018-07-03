@@ -10,9 +10,8 @@
 		<version>1.1.1</version>
 	</parent>
 
-	<artifactId>snow-common-web-vertx</artifactId>
-	<packaging>jar</packaging>
-	<name>snow-common-web-vertx</name>
+	<artifactId>snow-common-spring-rabbit</artifactId>
+	<name>snow-common-spring-rabbit</name>
 	<url>https://github.com/justlive1/earth-snow</url>
 
 	<properties>
@@ -22,37 +21,29 @@
 	<dependencies>
 
 		<dependency>
-			<groupId>vip.justlive</groupId>
-			<artifactId>snow-common-base</artifactId>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-messaging</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>io.vertx</groupId>
-			<artifactId>vertx-core</artifactId>
+			<groupId>org.springframework.amqp</groupId>
+			<artifactId>spring-rabbit</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>io.vertx</groupId>
-			<artifactId>vertx-web</artifactId>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>io.vertx</groupId>
-			<artifactId>vertx-unit</artifactId>
+			<groupId>com.caucho</groupId>
+			<artifactId>hessian</artifactId>
 		</dependency>
-
-		<dependency>
-			<groupId>org.reflections</groupId>
-			<artifactId>reflections</artifactId>
-		</dependency>
-
 
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 	</dependencies>
-
 </project>
