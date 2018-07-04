@@ -13,9 +13,11 @@
  */
 package vip.justlive.common.base.convert.support;
 
+import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Map;
 import com.google.common.collect.Maps;
+import vip.justlive.common.base.convert.ArrayConverter;
 import vip.justlive.common.base.convert.Converter;
 import vip.justlive.common.base.convert.ConverterFactory;
 import vip.justlive.common.base.convert.ConverterRegistry;
@@ -30,10 +32,17 @@ import vip.justlive.common.base.util.Checks;
  */
 public class DefaultConverterService implements ConverterService, ConverterRegistry {
 
+  private static volatile DefaultConverterService sharedConverterService;
+
   /**
    * 转换器集合
    */
   private Map<ConverterTypePair, Converter<Object, Object>> converters = Maps.newHashMap();
+  private Map<ConverterTypePair, ArrayConverter> arrayConverters = Maps.newHashMap();
+
+  public DefaultConverterService() {
+    addDefaultConverter(this);
+  }
 
   @SuppressWarnings("unchecked")
   @Override
@@ -54,17 +63,58 @@ public class DefaultConverterService implements ConverterService, ConverterRegis
   }
 
   @Override
+  public ConverterRegistry addArrayConverter(ArrayConverter converter) {
+    Checks.notNull(converter);
+    arrayConverters.put(converter.pair(), converter);
+    return this;
+  }
+
+  @Override
   public boolean canConverter(Class<?> source, Class<?> target) {
-    return converters.containsKey(ConverterTypePair.create(source, target));
+    return source.equals(target)
+        || converters.containsKey(ConverterTypePair.create(source, target));
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public <T> T convert(Object source, Class<T> targetType) {
+    if (source.getClass().equals(targetType)) {
+      return (T) source;
+    }
+    if (targetType.isArray()) {
+      ArrayConverter converter =
+          arrayConverters.get(ConverterTypePair.create(source.getClass(), Array.class));
+      return (T) Checks.notNull(converter).convert(source, source.getClass(), targetType);
+    }
     Converter<Object, Object> converter =
         converters.get(ConverterTypePair.create(source.getClass(), targetType));
 
     return (T) Checks.notNull(converter).convert(source);
   }
 
+  /**
+   * 获取共享单例类型转换器
+   * 
+   * @return 类型转换器
+   */
+  public static DefaultConverterService sharedConverterService() {
+    DefaultConverterService cs = sharedConverterService;
+    if (cs == null) {
+      synchronized (DefaultConverterService.class) {
+        cs = sharedConverterService;
+        if (cs == null) {
+          sharedConverterService = new DefaultConverterService();
+        }
+      }
+    }
+    return sharedConverterService;
+  }
+
+  public static void addDefaultConverter(ConverterRegistry registry) {
+    ConverterService converterService = (ConverterService) registry;
+    registry.addConverter(new StringToBooleanConverter())
+        .addConverter(new StringToCharacterConverter())
+        .addConverterFactory(new StringToNumberConverterFactory())
+        .addArrayConverter(new StringToArrayConverter(converterService));
+  }
 }

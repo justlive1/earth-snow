@@ -23,7 +23,7 @@ import vip.justlive.common.web.vertx.annotation.VertxPathParam;
  * @author wubo
  *
  */
-public class PathParamResolver extends AbastractConverterParamResolver {
+public class PathParamResolver extends AbstractConverterParamResolver {
 
   @Override
   public boolean supported(Parameter parameter) {

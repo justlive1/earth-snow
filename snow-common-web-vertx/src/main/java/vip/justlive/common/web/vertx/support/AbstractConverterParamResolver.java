@@ -23,11 +23,11 @@ import vip.justlive.common.web.vertx.exception.ErrorCodes;
  * @author wubo
  *
  */
-public abstract class AbastractConverterParamResolver implements MethodParamResolver {
+public abstract class AbstractConverterParamResolver implements MethodParamResolver {
 
   protected ConverterService converterService;
 
-  public AbastractConverterParamResolver converterService(ConverterService converterService) {
+  public AbstractConverterParamResolver converterService(ConverterService converterService) {
     this.converterService = converterService;
     return this;
   }

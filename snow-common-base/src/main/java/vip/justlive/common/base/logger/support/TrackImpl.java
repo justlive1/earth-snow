@@ -93,6 +93,7 @@ public class TrackImpl implements Track {
       String info = String.format("RES [%s] [%s] [%s] [%s]", uid(), req(), ctx(), format);
       access.info(info, args);
     }
+    UIDS.remove();
   }
 
   @Override
@@ -144,8 +145,9 @@ public class TrackImpl implements Track {
 
   private String scn(String clazz) {
     final int index = clazz.lastIndexOf(CLASS_SEPERATOR);
-    if (index == -1)
+    if (index == -1) {
       return clazz;
+    }
     return clazz.substring(index + 1);
   }
 

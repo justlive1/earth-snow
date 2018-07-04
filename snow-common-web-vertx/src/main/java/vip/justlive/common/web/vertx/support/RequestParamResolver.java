@@ -23,7 +23,7 @@ import vip.justlive.common.web.vertx.annotation.VertxRequestParam;
  * @author wubo
  *
  */
-public class RequestParamResolver extends AbastractConverterParamResolver {
+public class RequestParamResolver extends AbstractConverterParamResolver {
 
   @Override
   public boolean supported(Parameter parameter) {

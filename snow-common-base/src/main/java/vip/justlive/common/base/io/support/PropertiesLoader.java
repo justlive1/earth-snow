@@ -64,6 +64,7 @@ public class PropertiesLoader extends AbstractResourceLoader implements Property
    * 
    * @return 属性集合
    */
+  @Override
   public Properties props() {
     if (!this.ready) {
       this.init();

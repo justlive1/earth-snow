@@ -85,7 +85,6 @@ public class PathMatcher {
           sb.append(NOT_SEPARATOR_REGEX);
         } else {
           pre = true;
-          continue;
         }
       } else {
         if (pre) {

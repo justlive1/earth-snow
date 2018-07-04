@@ -1,6 +1,6 @@
 package vip.justlive.common.web.vertx;
 
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CountDownLatch;
 import org.junit.Test;
 import io.vertx.core.Vertx;
 
@@ -15,17 +15,19 @@ public class ApplicationTest {
   @Test
   public void testRoute() throws InterruptedException {
 
+    CountDownLatch latch = new CountDownLatch(1);
+
     Vertx vertx = Vertx.vertx();
-    vertx.deployVerticle(VerticleDemo.class.getName());
+    vertx.deployVerticle(VerticleDemo.class.getName(), r -> {
+      vertx.createHttpClient().get(8080, "localhost", "/demo/test/1000?request=path")
+          .putHeader("header", "true").handler(res -> {
+            res.bodyHandler(System.out::println);
+          }).exceptionHandler(System.out::println).endHandler(s -> latch.countDown()).end();
 
-    TimeUnit.SECONDS.sleep(12);
+    });
 
-    vertx.createHttpClient().get(8080, "localhost", "/demo/test/1000?request=path")
-        .putHeader("header", "true").handler(res -> {
-          res.bodyHandler(System.out::println);
-        }).exceptionHandler(System.out::println).end();
+    latch.await();
 
-    TimeUnit.SECONDS.sleep(2);
   }
 
 }

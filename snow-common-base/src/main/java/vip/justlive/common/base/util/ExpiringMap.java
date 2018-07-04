@@ -39,7 +39,8 @@ import org.apache.commons.lang3.concurrent.BasicThreadFactory;
  * Example usages:
  * 
  * <pre>
- * {@code
+ * {
+ *   &#64;code
  *   Map<String, Integer> map = ExpiringMap.<String, Integer>builder()
  *       .expiration(30, TimeUnit.SECONDS).expiringPolicy(ExpiringPolicy.ACCESSED)
  *       .cleanPolicy(CleanPolicy.ACCUMULATE).accumulateThreshold(50).build();
@@ -344,7 +345,7 @@ public class ExpiringMap<K, V> implements ConcurrentMap<K, V>, Serializable {
     try {
       readLock.lock();
       return data.entrySet().parallelStream().filter(r -> !r.getValue().isExpired())
-          .map(r -> r.getKey()).collect(Collectors.toSet());
+          .map(Map.Entry::getKey).collect(Collectors.toSet());
     } finally {
       readLock.unlock();
     }
@@ -484,12 +485,12 @@ public class ExpiringMap<K, V> implements ConcurrentMap<K, V>, Serializable {
   }
 
   private void runScheduleCleanPolicy() {
-    executorService.scheduleWithFixedDelay(() -> expiredClean(), scheduleDelay, scheduleDelay,
+    executorService.scheduleWithFixedDelay(this::expiredClean, scheduleDelay, scheduleDelay,
         TimeUnit.SECONDS);
   }
 
   private void runAccumulateCleanPolicy() {
-    executorService.execute(() -> expiredClean());
+    executorService.execute(this::expiredClean);
   }
 
   /**

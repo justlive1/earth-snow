@@ -22,15 +22,13 @@ import org.reflections.Reflections;
 import com.google.common.collect.ImmutableList;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.Json;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import lombok.extern.slf4j.Slf4j;
 import vip.justlive.common.base.constant.BaseConstants;
 import vip.justlive.common.base.convert.support.DefaultConverterService;
-import vip.justlive.common.base.convert.support.StringToBooleanConverter;
-import vip.justlive.common.base.convert.support.StringToCharacterConverter;
-import vip.justlive.common.base.convert.support.StringToNumberConverterFactory;
 import vip.justlive.common.base.exception.Exceptions;
 import vip.justlive.common.web.vertx.annotation.VertxRoute;
 import vip.justlive.common.web.vertx.annotation.VertxRouteMapping;
@@ -57,10 +55,7 @@ public class RouteRegisterFactory {
     this.router = router;
     this.routeWraps = new HashMap<>(32);
 
-    DefaultConverterService converterService = new DefaultConverterService();
-    converterService.addConverter(new StringToBooleanConverter())
-        .addConverter(new StringToCharacterConverter())
-        .addConverterFactory(new StringToNumberConverterFactory());
+    DefaultConverterService converterService = DefaultConverterService.sharedConverterService();
 
     this.paramResolver = new ParamResolverComposite(ImmutableList.<MethodParamResolver>builder()
         .add(new RequestParamResolver().converterService(converterService))
@@ -170,7 +165,9 @@ public class RouteRegisterFactory {
 
     ParamWrap[] paramWraps = new ParamWrap[parameters.length];
     for (int i = 0; i < parameters.length; i++) {
-      if (paramResolver.supported(parameters[i])) {
+      if (RoutingContext.class.equals(parameters[i].getType())) {
+        paramWraps[i] = new ParamWrap("", true, i, RoutingContext.class);
+      } else if (paramResolver.supported(parameters[i])) {
         paramWraps[i] = paramResolver.resolve(parameters[i]);
       }
     }
@@ -221,13 +218,19 @@ public class RouteRegisterFactory {
     for (int i = 0; i < wrap.paramWraps.length; i++) {
       ParamWrap param = wrap.paramWraps[i];
       if (param != null) {
-        args[i] = paramResolver.render(param, ctx);
+        if (RoutingContext.class.equals(param.getClazz())) {
+          args[i] = ctx;
+        } else {
+          args[i] = paramResolver.render(param, ctx);
+        }
       }
     }
 
     try {
       Object obj = wrap.method.invoke(wrap.bean, args);
-      ctx.response().end(obj.toString());
+      if (Void.TYPE != wrap.method.getReturnType()) {
+        ctx.response().end(Json.encode(obj));
+      }
     } catch (Exception e) {
       throw Exceptions.wrap(e);
     }
