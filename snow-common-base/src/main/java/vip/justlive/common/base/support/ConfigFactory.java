@@ -23,9 +23,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import lombok.extern.slf4j.Slf4j;
 import vip.justlive.common.base.annotation.Value;
 import vip.justlive.common.base.convert.support.DefaultConverterService;
-import vip.justlive.common.base.convert.support.StringToBooleanConverter;
-import vip.justlive.common.base.convert.support.StringToCharacterConverter;
-import vip.justlive.common.base.convert.support.StringToNumberConverterFactory;
 import vip.justlive.common.base.exception.Exceptions;
 import vip.justlive.common.base.io.PropertySource;
 import vip.justlive.common.base.io.support.PropertiesLoader;
@@ -66,17 +63,6 @@ public class ConfigFactory {
    * 临时编号前缀
    */
   private static final String TMP_PREFIX = "ConfigFactory.tmp.%s";
-
-  /**
-   * 类型转换器
-   */
-  private static final DefaultConverterService CONVERTER_SERVICE = new DefaultConverterService();
-
-  static {
-    CONVERTER_SERVICE.addConverter(new StringToBooleanConverter())
-        .addConverter(new StringToCharacterConverter())
-        .addConverterFactory(new StringToNumberConverterFactory());
-  }
 
   /**
    * 加载配置文件
@@ -192,7 +178,7 @@ public class ConfigFactory {
     if (value.getClass() == type) {
       return value;
     }
-    return CONVERTER_SERVICE.convert(value, type);
+    return DefaultConverterService.sharedConverterService().convert(value, type);
   }
 
 }
