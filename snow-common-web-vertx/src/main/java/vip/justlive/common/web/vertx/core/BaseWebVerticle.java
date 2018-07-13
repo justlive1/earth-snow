@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package vip.justlive.common.web.vertx;
+package vip.justlive.common.web.vertx.core;
 
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
@@ -19,18 +19,16 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.AuthHandler;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CookieHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.handler.SessionHandler;
 import io.vertx.ext.web.handler.TimeoutHandler;
-import io.vertx.ext.web.handler.UserSessionHandler;
 import io.vertx.ext.web.sstore.LocalSessionStore;
 import io.vertx.ext.web.sstore.SessionStore;
 import vip.justlive.common.base.constant.BaseConstants;
+import vip.justlive.common.web.vertx.support.RouteRegisterFactory;
 
 /**
  * 基础web单元
@@ -46,47 +44,60 @@ public abstract class BaseWebVerticle extends AbstractVerticle {
    * @param router router
    */
   protected void baseRoute(Router router) {
-    baseRoute(router, LocalSessionStore.create(vertx));
+    baseRoute(BaseConstants.ANY, router);
+  }
+
+  /**
+   * 基础路由
+   * 
+   * @param allowedOriginPattern origin
+   * @param router router
+   */
+  protected void baseRoute(String allowedOriginPattern, Router router) {
+    baseRoute(allowedOriginPattern, router, LocalSessionStore.create(vertx), -1);
   }
 
   /**
    * 基础路由
    *
+   * @param allowedOriginPattern origin
    * @param router router
    * @param sessionStore 会话存储
+   * @param timeout 超时时间
    */
-  protected void baseRoute(Router router, SessionStore sessionStore) {
+  protected void baseRoute(String allowedOriginPattern, Router router, SessionStore sessionStore,
+      long timeout) {
     Set<HttpMethod> methods = ImmutableSet.<HttpMethod>builder().add(HttpMethod.GET)
         .add(HttpMethod.POST).add(HttpMethod.OPTIONS).add(HttpMethod.PUT).add(HttpMethod.DELETE)
         .add(HttpMethod.HEAD).build();
 
     Set<String> headers = ImmutableSet.of(HttpHeaderNames.ACCEPT.toString(),
+        HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(),
         HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS.toString(),
-        HttpHeaderNames.AUTHORIZATION.toString());
+        HttpHeaderNames.AUTHORIZATION.toString(), HttpHeaderNames.CONTENT_TYPE.toString());
 
-    router.route().handler(
-        CorsHandler.create(BaseConstants.ANY).allowedMethods(methods).allowedHeaders(headers));
+    router.route()
+        .handler(CorsHandler.create(allowedOriginPattern)
+            .allowCredentials(!BaseConstants.ANY.equals(allowedOriginPattern))
+            .allowedMethods(methods).allowedHeaders(headers));
     router.route().handler(CookieHandler.create());
     router.route().handler(BodyHandler.create());
-    router.route().handler(TimeoutHandler.create());
+    if (timeout > 0) {
+      router.route().handler(TimeoutHandler.create(timeout));
+    }
     router.route().handler(SessionHandler.create(sessionStore));
     router.exceptionHandler(this::log);
   }
 
   /**
-   * 安全认证路由
+   * 业务路由
    * 
    * @param router router
-   * @param authProvider 认证提供
-   * @param authHandler 认证处理
-   * @param authUrl 认证路径统配
+   * @param scanPackages 扫包路径
    */
-  protected void authRoute(Router router, AuthProvider authProvider, AuthHandler authHandler,
-      String authUrl) {
-    if (authProvider != null && authHandler != null) {
-      router.route().handler(UserSessionHandler.create(authProvider));
-      router.route(authUrl).handler(authHandler);
-    }
+  protected void serviceRoute(Router router, String scanPackages) {
+    RouteRegisterFactory routeRegisterFactory = new RouteRegisterFactory(router);
+    routeRegisterFactory.execute(scanPackages);
   }
 
   /**
