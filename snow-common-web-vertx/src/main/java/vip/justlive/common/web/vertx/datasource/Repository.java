@@ -16,6 +16,10 @@ package vip.justlive.common.web.vertx.datasource;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.jdbc.JDBCClient;
 
@@ -34,7 +38,7 @@ public class Repository<T> {
 
   private final TableInfo tableInfo;
 
-  Repository() {
+  public Repository() {
     Type type = getClass().getGenericSuperclass();
     if (type instanceof ParameterizedType) {
       ParameterizedType pType = (ParameterizedType) type;
@@ -59,19 +63,113 @@ public class Repository<T> {
     return DataSourceFactory.sharedSingleJdbcClient(getClass());
   }
 
-  public void findById(Serializable id) {
+  /**
+   * 根据id获取实体
+   * 
+   * @param id id
+   * @return JdbcPromise
+   */
+  public ModelPromise<T> findById(Serializable id) {
     if (tableInfo == null || tableInfo.primaryKey == null) {
       throw new IllegalArgumentException("当前实体没有主键");
     }
 
     String sql = String.format(SQL_TEMPLATE_SELECT_BY_ID, tableInfo.tableName);
-    jdbcClient().querySingleWithParams(sql, new JsonArray().add(id), rs -> {
-      if (rs.succeeded()) {
-        JsonArray jsonArray = rs.result();
-        System.out.println(jsonArray);
-      }
-      // TODO error
-    });
+    ModelPromise<T> promise = new ModelPromise<>();
+    jdbcClient().querySingleWithParams(sql, new JsonArray().add(id), promise);
+    return promise;
   }
 
+  @FunctionalInterface
+  public interface Then<S> {
+
+    /**
+     * 处理
+     *
+     * @param result 结果
+     */
+    void then(S result);
+  }
+
+  /**
+   * jdbc处理约定
+   * 
+   * @author wubo
+   *
+   * @param <T>
+   */
+  public class JdbcPromise<R> implements Handler<AsyncResult<R>> {
+
+    protected List<Then<R>> successes = new ArrayList<>();
+    protected List<Then<Throwable>> fails = new ArrayList<>();
+
+    @Override
+    public void handle(AsyncResult<R> event) {
+      if (event.succeeded()) {
+        R result = event.result();
+        for (Then<R> then : successes) {
+          then.then(result);
+        }
+      } else {
+        for (Then<Throwable> then : fails) {
+          then.then(event.cause());
+        }
+      }
+    }
+
+    /**
+     * 成功后续处理
+     *
+     * @param then 处理逻辑
+     * @return promise
+     */
+    public JdbcPromise<R> succeeded(Then<R> then) {
+      successes.add(then);
+      return this;
+    }
+
+    /**
+     * 失败后续处理
+     *
+     * @param then 处理逻辑
+     * @return promise
+     */
+    public JdbcPromise<R> failed(Then<Throwable> then) {
+      fails.add(then);
+      return this;
+    }
+
+  }
+
+  public class ModelPromise<R> extends JdbcPromise<JsonArray> {
+
+    protected List<Then<R>> successes = new ArrayList<>();
+
+    @Override
+    public void handle(AsyncResult<JsonArray> event) {
+      if (event.succeeded()) {
+        event.result();
+        // TODO 转换类型
+        R result = null;
+        for (Then<R> then : successes) {
+          then.then(result);
+        }
+      } else {
+        for (Then<Throwable> then : fails) {
+          then.then(event.cause());
+        }
+      }
+    }
+
+    public ModelPromise<R> then(Then<R> then) {
+      successes.add(then);
+      return this;
+    }
+
+    @Override
+    public ModelPromise<R> failed(Then<Throwable> then) {
+      super.failed(then);
+      return this;
+    }
+  }
 }
