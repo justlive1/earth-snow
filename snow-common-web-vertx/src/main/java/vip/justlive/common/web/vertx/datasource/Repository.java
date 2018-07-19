@@ -22,6 +22,8 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.jdbc.JDBCClient;
+import vip.justlive.common.base.datasource.ModelHelper;
+import vip.justlive.common.base.datasource.TableInfo;
 
 /**
  * Repository
@@ -70,11 +72,11 @@ public class Repository<T> {
    * @return JdbcPromise
    */
   public ModelPromise<T> findById(Serializable id) {
-    if (tableInfo == null || tableInfo.primaryKey == null) {
+    if (tableInfo == null || tableInfo.getPrimaryKey() == null) {
       throw new IllegalArgumentException("当前实体没有主键");
     }
 
-    String sql = String.format(SQL_TEMPLATE_SELECT_BY_ID, tableInfo.tableName);
+    String sql = String.format(SQL_TEMPLATE_SELECT_BY_ID, tableInfo.getTableName());
     ModelPromise<T> promise = new ModelPromise<>();
     jdbcClient().querySingleWithParams(sql, new JsonArray().add(id), promise);
     return promise;

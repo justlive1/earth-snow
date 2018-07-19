@@ -11,9 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package vip.justlive.common.web.vertx.datasource;
+package vip.justlive.common.base.datasource;
 
 import java.util.List;
+import lombok.Data;
 
 /**
  * 表信息
@@ -21,6 +22,7 @@ import java.util.List;
  * @author wubo
  *
  */
+@Data
 public class TableInfo {
 
   protected String tableName;
@@ -35,6 +37,7 @@ public class TableInfo {
    * @author wubo
    *
    */
+  @Data
   public static class ColumnInfo {
 
     protected String columnName;
