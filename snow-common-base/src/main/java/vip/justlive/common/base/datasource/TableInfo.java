@@ -13,6 +13,7 @@
  */
 package vip.justlive.common.base.datasource;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import lombok.Data;
 
@@ -25,11 +26,42 @@ import lombok.Data;
 @Data
 public class TableInfo {
 
+  public static final String COLUMN_SEPARATOR = ",";
+  public static final String COLUMN_SEAT = "?";
+
+  /**
+   * 表名
+   */
   protected String tableName;
 
+  /**
+   * 主键列
+   */
   protected ColumnInfo primaryKey;
 
+  /**
+   * 列
+   */
   protected List<ColumnInfo> columns;
+
+  /**
+   * 查询属性列
+   */
+  protected String baseColumnList;
+
+  public String getBaseColumnList() {
+    if (baseColumnList == null) {
+      StringBuilder sb = new StringBuilder();
+      for (ColumnInfo column : columns) {
+        sb.append(COLUMN_SEPARATOR).append(column.columnName);
+      }
+      if (sb.length() > 0) {
+        sb.deleteCharAt(0);
+      }
+      this.baseColumnList = sb.toString();
+    }
+    return baseColumnList;
+  }
 
   /**
    * 列信息
@@ -40,12 +72,29 @@ public class TableInfo {
   @Data
   public static class ColumnInfo {
 
+    /**
+     * 列名
+     */
     protected String columnName;
 
+    /**
+     * 属性名
+     */
     protected String fieldName;
 
+    /**
+     * 是否主键
+     */
     protected boolean primaryKey;
 
+    /**
+     * 属性类型
+     */
     protected Class<?> type;
+
+    /**
+     * field
+     */
+    protected Field field;
   }
 }

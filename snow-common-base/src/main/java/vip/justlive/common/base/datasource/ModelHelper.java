@@ -91,6 +91,7 @@ public class ModelHelper {
       columnInfo.fieldName = field.getName();
       columnInfo.primaryKey = field.isAnnotationPresent(Id.class);
       columnInfo.type = field.getType();
+      columnInfo.field = field;
       return columnInfo;
     }
     throw new IllegalArgumentException("缺失 @Column 注解");
