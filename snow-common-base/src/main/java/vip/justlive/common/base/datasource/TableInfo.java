@@ -28,6 +28,8 @@ public class TableInfo {
 
   public static final String COLUMN_SEPARATOR = ",";
   public static final String COLUMN_SEAT = "?";
+  public static final String COLUMN_EQUAL = " = ";
+  public static final String COLUMN_AND = " and ";
 
   /**
    * 表名

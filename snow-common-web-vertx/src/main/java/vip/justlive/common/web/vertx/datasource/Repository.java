@@ -16,19 +16,11 @@ package vip.justlive.common.web.vertx.datasource;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.commons.beanutils.PropertyUtils;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.sql.UpdateResult;
-import lombok.extern.slf4j.Slf4j;
 import vip.justlive.common.base.datasource.ModelHelper;
 import vip.justlive.common.base.datasource.TableInfo;
-import vip.justlive.common.base.datasource.TypeHandlerHelper;
-import vip.justlive.common.base.exception.Exceptions;
 
 /**
  * Repository
@@ -37,15 +29,11 @@ import vip.justlive.common.base.exception.Exceptions;
  *
  * @param <T> 泛型
  */
-@Slf4j
 public class Repository<T> {
-
-  private static final String SQL_TEMPLATE_SELECT_BY_ID = "select %s from %s where id = ?";
-  private static final String SQL_TEMPLATE_INSERT = "insert into %s (%s) values (%s)";
 
   protected Class<T> clazz;
 
-  private final TableInfo tableInfo;
+  protected final TableInfo tableInfo;
 
   @SuppressWarnings("unchecked")
   public Repository() {
@@ -79,12 +67,34 @@ public class Repository<T> {
    * @param id id
    * @return JdbcPromise
    */
-  public ModelPromise findById(Serializable id) {
-    check();
-    String sql = String.format(SQL_TEMPLATE_SELECT_BY_ID, tableInfo.getBaseColumnList(),
-        tableInfo.getTableName());
-    ModelPromise promise = new ModelPromise();
+  public ModelPromise<T> findById(Serializable id) {
+    RepositoryHelper.check(tableInfo);
+
+    TableInfo.ColumnInfo primaryKey = tableInfo.getPrimaryKey();
+    if (primaryKey == null) {
+      throw new IllegalArgumentException("@Id 缺失");
+    }
+    String sql = String.format(RepositoryHelper.SQL_TEMPLATE_SELECT_BY_ID,
+        tableInfo.getBaseColumnList(), tableInfo.getTableName(), primaryKey.getColumnName());
+    ModelPromise<T> promise = new ModelPromise<>(this);
     jdbcClient().querySingleWithParams(sql, new JsonArray().add(id), promise);
+    return promise;
+  }
+
+  /**
+   * 根据model查询
+   * 
+   * @param model 实体
+   * @return ModelsPromise
+   */
+  public ModelsPromise<T> findByModel(T model) {
+    RepositoryHelper.check(tableInfo, model);
+
+    ModelsPromise<T> promise = new ModelsPromise<>(this);
+    JsonArray jsonArray = new JsonArray();
+    String sql = RepositoryHelper.parseSelect(model, jsonArray, tableInfo);
+    jdbcClient().queryWithParams(sql, jsonArray, promise);
+
     return promise;
   }
 
@@ -95,156 +105,14 @@ public class Repository<T> {
    * @return JdbcPromise
    */
   public JdbcPromise<UpdateResult> save(T model) {
-    check();
-    if (model == null) {
-      throw new IllegalArgumentException("model cannot be null");
-    }
+    RepositoryHelper.check(tableInfo, model);
 
     JdbcPromise<UpdateResult> promise = new JdbcPromise<>();
     JsonArray jsonArray = new JsonArray();
-    String sql = parse(model, jsonArray);
+    String sql = RepositoryHelper.parseInsert(model, jsonArray, tableInfo);
     jdbcClient().updateWithParams(sql, jsonArray, promise);
 
     return promise;
-  }
-
-
-  private void check() {
-    if (tableInfo == null || tableInfo.getPrimaryKey() == null) {
-      throw new IllegalArgumentException("当前实体没有主键");
-    }
-  }
-
-  private String parse(T model, JsonArray jsonArray) {
-    StringBuilder sb = new StringBuilder();
-    StringBuilder seat = new StringBuilder();
-    for (TableInfo.ColumnInfo column : tableInfo.getColumns()) {
-      if (!column.getField().isAccessible()) {
-        column.getField().setAccessible(true);
-      }
-      try {
-        Object value = column.getField().get(model);
-        if (value != null) {
-          sb.append(TableInfo.COLUMN_SEPARATOR).append(column.getColumnName());
-          seat.append(TableInfo.COLUMN_SEPARATOR).append(TableInfo.COLUMN_SEAT);
-          jsonArray.add(value);
-        }
-      } catch (Exception e) {
-        throw Exceptions.wrap(e);
-      }
-    }
-    if (sb.length() > 0) {
-      sb.deleteCharAt(0);
-      seat.deleteCharAt(0);
-    }
-    return String.format(SQL_TEMPLATE_INSERT, tableInfo.getTableName(), sb.toString(),
-        seat.toString());
-  }
-
-  private T convert(JsonArray jsonArray) {
-    try {
-      T obj = clazz.newInstance();
-      for (int i = 0, len = tableInfo.getColumns().size(); i < len; i++) {
-        TableInfo.ColumnInfo column = tableInfo.getColumns().get(i);
-        Object fieldValue = TypeHandlerHelper.getResult(jsonArray, i, column.getType());
-        PropertyUtils.setProperty(obj, column.getFieldName(), fieldValue);
-      }
-      return obj;
-    } catch (Exception e) {
-      throw Exceptions.wrap(e);
-    }
-  }
-
-  @FunctionalInterface
-  public interface Then<S> {
-
-    /**
-     * 处理
-     *
-     * @param result 结果
-     */
-    void then(S result);
-  }
-
-  /**
-   * jdbc处理约定
-   * 
-   * @author wubo
-   *
-   * @param <R>
-   */
-  public class JdbcPromise<R> implements Handler<AsyncResult<R>> {
-
-    protected List<Then<R>> successes = new ArrayList<>();
-    protected List<Then<Throwable>> fails = new ArrayList<>();
-
-    @Override
-    public void handle(AsyncResult<R> event) {
-      if (event.succeeded()) {
-        R result = event.result();
-        for (Then<R> then : successes) {
-          then.then(result);
-        }
-      } else {
-        log.error("jdbc option error ", event.cause());
-        for (Then<Throwable> then : fails) {
-          then.then(event.cause());
-        }
-      }
-    }
-
-    /**
-     * 成功后续处理
-     *
-     * @param then 处理逻辑
-     * @return promise
-     */
-    public JdbcPromise<R> succeeded(Then<R> then) {
-      successes.add(then);
-      return this;
-    }
-
-    /**
-     * 失败后续处理
-     *
-     * @param then 处理逻辑
-     * @return promise
-     */
-    public JdbcPromise<R> failed(Then<Throwable> then) {
-      fails.add(then);
-      return this;
-    }
-
-  }
-
-  /**
-   * Model约定
-   * 
-   * @author wubo
-   *
-   */
-  public class ModelPromise extends JdbcPromise<JsonArray> {
-
-    protected List<Then<T>> successes = new ArrayList<>();
-
-    @Override
-    public void handle(AsyncResult<JsonArray> event) {
-      if (event.succeeded()) {
-        T result = convert(event.result());
-        for (Then<T> then : successes) {
-          then.then(result);
-        }
-      } else {
-        for (Then<Throwable> then : fails) {
-          then.then(event.cause());
-        }
-      }
-    }
-
-    public ModelPromise then(Then<T> then) {
-      successes.add(then);
-      return this;
-    }
   }
 
 }

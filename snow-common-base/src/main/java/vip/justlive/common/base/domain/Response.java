@@ -46,6 +46,18 @@ public class Response<T> {
   /**
    * 成功返回
    * 
+   * @param <T> 泛型类
+   * @return 返回实体
+   */
+  public static <T> Response<T> success() {
+    Response<T> resp = new Response<>();
+    resp.setCode(SUCC);
+    return resp;
+  }
+
+  /**
+   * 成功返回
+   * 
    * @param data 数据
    * @param <T> 泛型类
    * @return 返回实体
