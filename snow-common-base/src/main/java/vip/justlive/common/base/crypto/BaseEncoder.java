@@ -29,12 +29,12 @@ import lombok.Setter;
 @Setter
 public abstract class BaseEncoder implements Encoder {
 
-  private static final String PREFIX = "{";
-  private static final String SUFFIX = "}";
-  private static final String EMPTY = "";
+  public static final String PREFIX = "{";
+  public static final String SUFFIX = "}";
+  public static final String EMPTY = "";
 
   protected int iterations = 1;
-  protected boolean useSalt = true;
+  protected boolean useSalt = false;
   protected int saltKeyLength = 8;
 
   private final SecureRandom random = new SecureRandom();
