@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package vip.justlive.common.web.vertx.core;
+package vip.justlive.common.web.vertx.auth;
 
 import java.util.List;
 import io.vertx.core.json.JsonArray;

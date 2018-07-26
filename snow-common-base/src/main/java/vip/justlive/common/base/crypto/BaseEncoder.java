@@ -48,7 +48,7 @@ public abstract class BaseEncoder implements Encoder {
     return encode(source, salt);
   }
 
-  private String encode(String source, String salt) {
+  protected String encode(String source, String salt) {
     String value = source.concat(salt);
     for (int i = 0; i < iterations; i++) {
       value = doEncode(value);
@@ -79,7 +79,7 @@ public abstract class BaseEncoder implements Encoder {
    * 
    * @return salt
    */
-  protected String generateSaltKey() {
+  public String generateSaltKey() {
     byte[] bytes = new byte[saltKeyLength];
     random.nextBytes(bytes);
     return Base64.getEncoder().encodeToString(bytes);
@@ -91,7 +91,7 @@ public abstract class BaseEncoder implements Encoder {
    * @param salt salt
    * @return
    */
-  protected String wrapperSalt(String salt) {
+  public String wrapperSalt(String salt) {
     return PREFIX.concat(salt).concat(SUFFIX);
   }
 
@@ -101,7 +101,7 @@ public abstract class BaseEncoder implements Encoder {
    * @param raw 包装后的salt
    * @return salt
    */
-  protected String extractSalt(String raw) {
+  public String extractSalt(String raw) {
     int start = raw.indexOf(PREFIX);
     if (start != 0) {
       return EMPTY;

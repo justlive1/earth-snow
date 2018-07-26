@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package vip.justlive.common.web.vertx.core;
+package vip.justlive.common.web.vertx.auth;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
