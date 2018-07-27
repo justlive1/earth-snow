@@ -28,7 +28,7 @@ public interface ArrayConverter {
    * 
    * @param sourceType 源类型
    * @param targetType 目标类型
-   * @return
+   * @return true为支持
    */
   boolean support(Class<?> sourceType, Class<?> targetType);
 
@@ -38,7 +38,7 @@ public interface ArrayConverter {
    * @param source 源数据
    * @param sourceType 源数据类型
    * @param targetType 目标类型
-   * @return
+   * @return 转换后数据
    */
   Object convert(Object source, Class<?> sourceType, Class<?> targetType);
 

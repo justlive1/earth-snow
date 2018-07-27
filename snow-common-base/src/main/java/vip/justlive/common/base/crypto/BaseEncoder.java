@@ -69,8 +69,8 @@ public abstract class BaseEncoder implements Encoder {
   /**
    * 执行加密
    * 
-   * @param source
-   * @return
+   * @param source 源数据
+   * @return 加密字符串
    */
   abstract String doEncode(String source);
 

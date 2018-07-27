@@ -18,8 +18,8 @@ package vip.justlive.common.base.datasource;
  * 
  * @author wubo
  *
- * @param <R>
- * @param <T>
+ * @param <R> 泛型
+ * @param <T> 泛型
  */
 public interface TypeHandler<R, T> {
 

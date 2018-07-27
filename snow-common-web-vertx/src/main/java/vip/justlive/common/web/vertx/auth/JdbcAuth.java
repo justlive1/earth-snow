@@ -39,8 +39,11 @@ import vip.justlive.common.base.crypto.Md5Encoder;
 @Data
 public class JdbcAuth implements AuthProvider {
 
+  public static final String DEFAULT_AUTHENTICATE_QUERY =
+      "SELECT PASSWORD FROM USER WHERE USERNAME = ?";
+
   private JDBCClient client;
-  private String authenticateQuery = JDBCAuth.DEFAULT_AUTHENTICATE_QUERY;
+  private String authenticateQuery = DEFAULT_AUTHENTICATE_QUERY;
   private String rolesQuery = JDBCAuth.DEFAULT_ROLES_QUERY;
   private String permissionsQuery = JDBCAuth.DEFAULT_PERMISSIONS_QUERY;
   private String rolePrefix = JDBCAuth.DEFAULT_ROLE_PREFIX;

@@ -66,6 +66,8 @@ public class TypeHandlerHelper {
    * @param resultSet 结果集
    * @param index 下标
    * @param clazz 转换类型
+   * @param <R> 泛型
+   * @param <T> 泛型
    * @return 结果
    */
   public static <R, T> T getResult(R resultSet, int index, Class<T> clazz) {

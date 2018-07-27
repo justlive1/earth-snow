@@ -39,8 +39,7 @@ import org.apache.commons.lang3.concurrent.BasicThreadFactory;
  * Example usages:
  * 
  * <pre>
- * {
- *   &#64;code
+ * {@code
  *   Map<String, Integer> map = ExpiringMap.<String, Integer>builder()
  *       .expiration(30, TimeUnit.SECONDS).expiringPolicy(ExpiringPolicy.ACCESSED)
  *       .cleanPolicy(CleanPolicy.ACCUMULATE).accumulateThreshold(50).build();
