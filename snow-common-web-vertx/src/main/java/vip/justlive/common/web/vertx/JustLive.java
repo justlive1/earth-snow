@@ -15,6 +15,8 @@ package vip.justlive.common.web.vertx;
 
 import io.vertx.core.Launcher;
 import io.vertx.core.Vertx;
+import io.vertx.core.logging.LoggerFactory;
+import io.vertx.core.logging.SLF4JLogDelegateFactory;
 
 /**
  * just live
@@ -45,6 +47,11 @@ public class JustLive extends Launcher {
    * @param args the user command line arguments.
    */
   public static void main(String[] args) {
+
+    // 使用SLF4J框架
+    System.setProperty(LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME,
+        SLF4JLogDelegateFactory.class.getName());
+
     new JustLive().dispatch(args);
   }
 
