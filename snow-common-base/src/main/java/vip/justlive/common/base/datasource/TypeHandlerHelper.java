@@ -55,7 +55,7 @@ public class TypeHandlerHelper {
   public static void registerTypeHandler(TypeHandler<?, ?> typeHandler) {
     Map<Class<?>, TypeHandler<?, ?>> map = HANDLERS.get(typeHandler.getOutType());
     if (map == null) {
-      HANDLERS.putIfAbsent(typeHandler.getOutType(), new ConcurrentHashMap<>());
+      HANDLERS.putIfAbsent(typeHandler.getOutType(), new ConcurrentHashMap<>(4));
     }
     HANDLERS.get(typeHandler.getOutType()).put(typeHandler.getInType(), typeHandler);
   }
