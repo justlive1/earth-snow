@@ -20,22 +20,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 自动创建单例bean<br>
- * 可用在类上用于自动实例化<br>
- * 也可用于Configuration类的方法上创建实例
+ * 标记是配置类
  * 
  * @author wubo
  *
  */
-@Documented
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Singleton {
+@Documented
+public @interface Configuration {
 
-  /**
-   * bean的id，默认使用class::getName
-   * 
-   * @return bean的id
-   */
-  String value() default "";
 }

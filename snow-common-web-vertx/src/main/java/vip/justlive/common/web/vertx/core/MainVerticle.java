@@ -16,6 +16,7 @@ package vip.justlive.common.web.vertx.core;
 import java.util.Set;
 import org.reflections.Reflections;
 import io.vertx.core.AbstractVerticle;
+import vip.justlive.common.base.ioc.Ioc;
 import vip.justlive.common.base.support.ConfigFactory;
 import vip.justlive.common.web.vertx.annotation.VertxVerticle;
 
@@ -28,6 +29,12 @@ public class MainVerticle extends AbstractVerticle {
 
   static {
     ConfigFactory.loadProperties("classpath:/config/*.properties");
+    String packages = ConfigFactory.getProperty("main.ioc.scan");
+    if (packages != null) {
+      Ioc.install(packages.split(","));
+    } else {
+      Ioc.install();
+    }
   }
 
   @Override
