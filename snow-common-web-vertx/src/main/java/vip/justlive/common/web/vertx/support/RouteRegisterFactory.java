@@ -232,7 +232,8 @@ public class RouteRegisterFactory {
         ctx.response().end(Json.encode(obj));
       }
     } catch (Exception e) {
-      throw Exceptions.wrap(e);
+      log.error("Router execute error", e);
+      ctx.fail(500);
     }
   }
 
