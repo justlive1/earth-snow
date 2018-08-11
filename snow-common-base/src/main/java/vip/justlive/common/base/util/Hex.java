@@ -21,7 +21,9 @@ package vip.justlive.common.base.util;
  */
 public final class Hex {
 
-  private static final char[] HEX =
+  Hex() {}
+
+  private static final char[] HEX_CHAR =
       {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
   /**
@@ -37,9 +39,9 @@ public final class Hex {
     int j = 0;
     for (int i = 0; i < nBytes; i++) {
       // Char for top 4 bits
-      result[j++] = HEX[(0xF0 & bytes[i]) >>> 4];
+      result[j++] = HEX_CHAR[(0xF0 & bytes[i]) >>> 4];
       // Bottom 4
-      result[j++] = HEX[(0x0F & bytes[i])];
+      result[j++] = HEX_CHAR[(0x0F & bytes[i])];
     }
 
     return result;

@@ -2,7 +2,7 @@ package vip.justlive.common.base.ioc;
 
 import vip.justlive.common.base.annotation.Singleton;
 
-@Singleton("NoDepBean")
+@Singleton
 public class NoDepBean {
 
   public void print() {

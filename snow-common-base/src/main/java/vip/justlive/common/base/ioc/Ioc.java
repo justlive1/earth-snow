@@ -41,7 +41,7 @@ public class Ioc {
 
   private static final Object EMPTY = new Object();
 
-  private static volatile boolean REQUIRED = true;
+  private static volatile boolean require = true;
 
   /**
    * 加载托管bean
@@ -101,25 +101,29 @@ public class Ioc {
   static void ioc() {
     int pre = TODO_INJECT.get();
     while (TODO_INJECT.get() > 0) {
-      BEANS.forEach((clazz, value) -> value.forEach((name, v) -> {
-        if (v == EMPTY) {
-          Object inst = instance(clazz);
-          if (inst != null) {
-            BEANS.get(clazz).put(name, inst);
-            TODO_INJECT.decrementAndGet();
-          }
-        }
-      }));
+      instance();
       int now = TODO_INJECT.get();
       if (now > 0 && now == pre) {
-        if (!REQUIRED) {
+        if (!require) {
           throw new IllegalStateException("发生循环依赖或者缺失Bean ");
         } else {
-          REQUIRED = false;
+          require = false;
         }
       }
       pre = now;
     }
+  }
+
+  static void instance() {
+    BEANS.forEach((clazz, value) -> value.forEach((name, v) -> {
+      if (v == EMPTY) {
+        Object inst = instance(clazz);
+        if (inst != null) {
+          BEANS.get(clazz).put(name, inst);
+          TODO_INJECT.decrementAndGet();
+        }
+      }
+    }));
   }
 
   static Object instance(Class<?> clazz) {
@@ -156,21 +160,27 @@ public class Ioc {
     return null;
   }
 
+  static Object getVal(Parameter param, ConcurrentMap<String, Object> map) {
+    Object val;
+    if (param.isAnnotationPresent(Named.class)) {
+      Named named = param.getAnnotation(Named.class);
+      val = map.get(named.value());
+    } else {
+      val = map.get(param.getType().getName());
+      if (val == null && !map.isEmpty()) {
+        val = map.values().iterator().next();
+      }
+    }
+    return val;
+  }
+
   static boolean fillParams(Parameter[] params, Object[] args, boolean required) {
     for (int i = 0; i < params.length; i++) {
       ConcurrentMap<String, Object> map = BEANS.get(params[i].getType());
       if (map != null) {
-        if (params[i].isAnnotationPresent(Named.class)) {
-          Named named = params[i].getAnnotation(Named.class);
-          args[i] = map.get(named.value());
-        } else {
-          args[i] = map.get(params[i].getType().getName());
-          if (args[i] == null && !map.isEmpty()) {
-            args[i] = map.values().iterator().next();
-          }
-        }
+        args[i] = getVal(params[i], map);
       }
-      if ((REQUIRED && args[i] == null) || (args[i] == null && required)) {
+      if (args[i] == EMPTY || (require && args[i] == null) || (args[i] == null && required)) {
         return false;
       }
     }

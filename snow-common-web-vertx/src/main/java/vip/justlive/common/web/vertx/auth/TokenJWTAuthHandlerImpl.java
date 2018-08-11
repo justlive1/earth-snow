@@ -31,9 +31,7 @@ import io.vertx.ext.web.handler.impl.JWTAuthHandlerImpl;
  */
 public class TokenJWTAuthHandlerImpl extends JWTAuthHandlerImpl implements TokenAuthHandler {
 
-  public static final String DEFAULT_TOKEN_PARAM = "_token";
-
-  private String tokenParam = DEFAULT_TOKEN_PARAM;
+  private String tokenParam = TokenAuthHandlerImpl.DEFAULT_TOKEN_PARAM;
 
   private JsonObject options = new JsonObject();
 
