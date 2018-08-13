@@ -13,35 +13,31 @@
  */
 package vip.justlive.common.base.ioc;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Parameter;
-import java.util.concurrent.ConcurrentHashMap;
+import java.lang.reflect.Method;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.reflections.Reflections;
-import vip.justlive.common.base.annotation.Inject;
-import vip.justlive.common.base.annotation.Named;
+import lombok.extern.slf4j.Slf4j;
+import vip.justlive.common.base.annotation.Configuration;
 import vip.justlive.common.base.annotation.Singleton;
 
 /**
- * Ioc
+ * Ioc <br>
+ * 当前只支持构造方法注入<br>
+ * 原因: 易于切换不同ioc实现
  * 
  * @author wubo
  *
  */
+@Slf4j
 public class Ioc {
 
   Ioc() {}
 
-  private static final ConcurrentMap<Class<?>, ConcurrentMap<String, Object>> BEANS =
-      new ConcurrentHashMap<>();
-
   private static final AtomicInteger TODO_INJECT = new AtomicInteger();
 
-  private static final Object EMPTY = new Object();
-
-  private static volatile boolean require = true;
+  private static Strategy strategy = new ConstructorStrategy();
 
   /**
    * 加载托管bean
@@ -51,50 +47,63 @@ public class Ioc {
   public static void install(String... packages) {
     scan(packages);
     ioc();
+    merge();
   }
 
   /**
-   * 根据类型获取bean
+   * 实例bean， 通过构造函数实例
    * 
    * @param clazz 类
-   * @return bean
+   * @return 实例
    */
-  public static <T> T getBean(Class<T> clazz) {
-    return getBean(clazz.getName(), clazz);
-  }
-
-  /**
-   * 根据类型和名称获取bean
-   * 
-   * @param name beanId
-   * @param clazz 类
-   * @return bean
-   */
-  public static <T> T getBean(String name, Class<T> clazz) {
-    ConcurrentMap<String, Object> map = BEANS.get(clazz);
-    if (map != null) {
-      return clazz.cast(map.get(name));
-    }
-    return null;
+  public static Object instanceBean(Class<?> clazz) {
+    return strategy.instance(clazz);
   }
 
   static void scan(String... packages) {
     Reflections ref = new Reflections("vip.justlive", packages);
+    // Configuration
+    for (Class<?> clazz : ref.getTypesAnnotatedWith(Configuration.class)) {
+      configBeans(clazz);
+    }
+    // Singleton
     for (Class<?> clazz : ref.getTypesAnnotatedWith(Singleton.class)) {
-      ConcurrentMap<String, Object> map = BEANS.get(clazz);
-      if (map == null) {
-        BEANS.putIfAbsent(clazz, new ConcurrentHashMap<>(1, 1f));
-      }
-
       Singleton singleton = clazz.getAnnotation(Singleton.class);
       String beanName = singleton.value();
       if (beanName == null || beanName.length() == 0) {
         beanName = clazz.getName();
       }
-      if (BEANS.get(clazz).putIfAbsent(beanName, EMPTY) != null) {
-        throw new IllegalArgumentException(String.format("[%s] 名称已被定义", beanName));
-      }
+      BeanStore.seize(clazz, beanName);
       TODO_INJECT.incrementAndGet();
+    }
+  }
+
+  static void configBeans(Class<?> clazz) {
+    Object obj;
+    try {
+      obj = clazz.newInstance();
+    } catch (Exception e) {
+      throw new IllegalStateException(String.format("@Configuration注解的类[%s]无法实例化", clazz), e);
+    }
+    for (Method method : clazz.getDeclaredMethods()) {
+      if (method.isAnnotationPresent(Singleton.class)) {
+        if (method.getParameterCount() > 0) {
+          throw new IllegalStateException("@Configuration下实例Bean不支持有参方式");
+        }
+        method.setAccessible(true);
+        Object bean;
+        try {
+          bean = method.invoke(obj);
+        } catch (Exception e) {
+          throw new IllegalStateException("@Configuration下实例方法出错", e);
+        }
+        Singleton singleton = method.getAnnotation(Singleton.class);
+        String name = singleton.value();
+        if (name.length() == 0) {
+          name = method.getName();
+        }
+        BeanStore.putBean(name, bean);
+      }
     }
   }
 
@@ -104,10 +113,13 @@ public class Ioc {
       instance();
       int now = TODO_INJECT.get();
       if (now > 0 && now == pre) {
-        if (!require) {
+        if (!strategy.isRequired()) {
+          if (log.isDebugEnabled()) {
+            log.debug("ioc失败 出现循环依赖或缺失Bean TODO_INJECT={}, beans={}", now, BeanStore.BEANS);
+          }
           throw new IllegalStateException("发生循环依赖或者缺失Bean ");
         } else {
-          require = false;
+          strategy.nonRequired();
         }
       }
       pre = now;
@@ -115,75 +127,22 @@ public class Ioc {
   }
 
   static void instance() {
-    BEANS.forEach((clazz, value) -> value.forEach((name, v) -> {
-      if (v == EMPTY) {
-        Object inst = instance(clazz);
+    BeanStore.BEANS.forEach((clazz, value) -> value.forEach((name, v) -> {
+      if (v == BeanStore.EMPTY) {
+        Object inst = instanceBean(clazz);
         if (inst != null) {
-          BEANS.get(clazz).put(name, inst);
+          BeanStore.putBean(name, inst);
           TODO_INJECT.decrementAndGet();
         }
       }
     }));
   }
 
-  static Object instance(Class<?> clazz) {
-    Constructor<?>[] constructors = clazz.getConstructors();
-    for (Constructor<?> constructor : constructors) {
-      if (constructor.isAnnotationPresent(Inject.class)) {
-        return dependencyInstance(clazz, constructor);
-      }
-    }
-    return nonDependencyInstance(clazz);
-  }
-
-  static Object nonDependencyInstance(Class<?> clazz) {
-    try {
-      return clazz.newInstance();
-    } catch (InstantiationException | IllegalAccessException e) {
-      throw new IllegalArgumentException(String.format("[%s]无参构造实例对象失败", clazz), e);
+  static void merge() {
+    for (Entry<Class<?>, ConcurrentMap<String, Object>> entry : BeanStore.BEANS.entrySet()) {
+      Class<?> clazz = entry.getKey();
+      BeanStore.merge(clazz, entry.getValue().values().iterator().next());
     }
   }
 
-  static Object dependencyInstance(Class<?> clazz, Constructor<?> constructor) {
-    Inject inject = constructor.getAnnotation(Inject.class);
-    Parameter[] params = constructor.getParameters();
-    Object[] args = new Object[params.length];
-    boolean canInst = fillParams(params, args, inject.required());
-    if (canInst) {
-      try {
-        return constructor.newInstance(args);
-      } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-          | InvocationTargetException e) {
-        throw new IllegalArgumentException(String.format("[%s]有参构造实例对象失败", clazz), e);
-      }
-    }
-    return null;
-  }
-
-  static Object getVal(Parameter param, ConcurrentMap<String, Object> map) {
-    Object val;
-    if (param.isAnnotationPresent(Named.class)) {
-      Named named = param.getAnnotation(Named.class);
-      val = map.get(named.value());
-    } else {
-      val = map.get(param.getType().getName());
-      if (val == null && !map.isEmpty()) {
-        val = map.values().iterator().next();
-      }
-    }
-    return val;
-  }
-
-  static boolean fillParams(Parameter[] params, Object[] args, boolean required) {
-    for (int i = 0; i < params.length; i++) {
-      ConcurrentMap<String, Object> map = BEANS.get(params[i].getType());
-      if (map != null) {
-        args[i] = getVal(params[i], map);
-      }
-      if (args[i] == EMPTY || (require && args[i] == null) || (args[i] == null && required)) {
-        return false;
-      }
-    }
-    return true;
-  }
 }

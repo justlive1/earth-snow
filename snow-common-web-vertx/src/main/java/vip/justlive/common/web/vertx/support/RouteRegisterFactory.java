@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import vip.justlive.common.base.constant.BaseConstants;
 import vip.justlive.common.base.convert.support.DefaultConverterService;
 import vip.justlive.common.base.exception.Exceptions;
+import vip.justlive.common.base.ioc.Ioc;
 import vip.justlive.common.web.vertx.annotation.VertxRoute;
 import vip.justlive.common.web.vertx.annotation.VertxRouteMapping;
 import vip.justlive.common.web.vertx.exception.ErrorCodes;
@@ -98,15 +99,11 @@ public class RouteRegisterFactory {
 
     VertxRoute route = clazz.getAnnotation(VertxRoute.class);
 
-    Object bean;
-    try {
-      bean = clazz.newInstance();
-    } catch (InstantiationException | IllegalAccessException e) {
-      throw Exceptions.wrap(e);
+    Object bean = Ioc.instanceBean(clazz);
+    if (bean == null) {
+      throw new IllegalStateException(String.format("[%s]Ioc实例化失败", clazz));
     }
-
     String root = transferUri(route.value());
-
     Method[] methods = clazz.getMethods();
 
     for (Method method : methods) {

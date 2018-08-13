@@ -44,6 +44,31 @@ public class BaseConstants {
   public static final String RESP_IS_SUCCESS = "success";
 
   /**
+   * 配置文件默认地址
+   */
+  public static final String CONFIG_PATH = "classpath:/config/*.properties";
+
+  /**
+   * override配置文件地址属性key
+   */
+  public static final String CONFIG_OVERRIDE_FILE_KEY = "config.override.file";
+
+  /**
+   * ioc扫码路径属性key
+   */
+  public static final String IOC_SCAN_KEY = "main.ioc.scan";
+
+  /**
+   * vertx verticle路径key
+   */
+  public static final String VERTICLE_PATH_KEY = "main.verticle.path";
+
+  /**
+   * 逗号分隔符
+   */
+  public static final String COMMA_SEPARATOR = ",";
+
+  /**
    * 匹配所有
    */
   public static final String ANY = "*";

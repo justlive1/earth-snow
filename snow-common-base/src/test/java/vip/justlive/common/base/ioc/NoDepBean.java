@@ -1,10 +1,8 @@
 package vip.justlive.common.base.ioc;
 
-import vip.justlive.common.base.annotation.Singleton;
+public class NoDepBean implements Inter{
 
-@Singleton
-public class NoDepBean {
-
+  @Override
   public void print() {
     System.out.println("this is a non dependencies bean");
   }

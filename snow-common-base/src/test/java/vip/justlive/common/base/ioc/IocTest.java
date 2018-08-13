@@ -10,7 +10,7 @@ public class IocTest {
 
     Ioc.install();
 
-    Assert.assertNotNull(Ioc.getBean(DepBean.class));
+    Assert.assertNotNull(BeanStore.getBean(Inter.class));
 
   }
 

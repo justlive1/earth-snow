@@ -16,6 +16,7 @@ package vip.justlive.common.web.vertx.core;
 import java.util.Set;
 import org.reflections.Reflections;
 import io.vertx.core.AbstractVerticle;
+import vip.justlive.common.base.constant.BaseConstants;
 import vip.justlive.common.base.ioc.Ioc;
 import vip.justlive.common.base.support.ConfigFactory;
 import vip.justlive.common.web.vertx.annotation.VertxVerticle;
@@ -28,10 +29,14 @@ import vip.justlive.common.web.vertx.annotation.VertxVerticle;
 public class MainVerticle extends AbstractVerticle {
 
   static {
-    ConfigFactory.loadProperties("classpath:/config/*.properties");
-    String packages = ConfigFactory.getProperty("main.ioc.scan");
+    ConfigFactory.loadProperties(BaseConstants.CONFIG_PATH);
+    String override = ConfigFactory.getProperty(BaseConstants.CONFIG_OVERRIDE_FILE_KEY);
+    if (override != null && override.length() > 0) {
+      ConfigFactory.loadProperties(override.split(BaseConstants.COMMA_SEPARATOR));
+    }
+    String packages = ConfigFactory.getProperty(BaseConstants.IOC_SCAN_KEY);
     if (packages != null) {
-      Ioc.install(packages.split(","));
+      Ioc.install(packages.split(BaseConstants.COMMA_SEPARATOR));
     } else {
       Ioc.install();
     }
@@ -40,7 +45,7 @@ public class MainVerticle extends AbstractVerticle {
   @Override
   public void start() {
 
-    String location = ConfigFactory.getProperty("main.verticle.path", "vip.justlive");
+    String location = ConfigFactory.getProperty(BaseConstants.VERTICLE_PATH_KEY, "vip.justlive");
     Reflections ref = new Reflections(location);
     Set<Class<?>> verticles = ref.getTypesAnnotatedWith(VertxVerticle.class);
     for (Class<?> clazz : verticles) {

@@ -3,8 +3,8 @@ package vip.justlive.common.base.ioc;
 import vip.justlive.common.base.annotation.Inject;
 import vip.justlive.common.base.annotation.Singleton;
 
-@Singleton
-public class DepBean {
+@Singleton("xxx")
+public class DepBean implements Inter{
 
   private final NoDepBean noDepBean;
 
@@ -13,6 +13,7 @@ public class DepBean {
     this.noDepBean = noDepBean;
   }
 
+  @Override
   public void print() {
     System.out.println("this bean has dependency of NoDepBean");
     noDepBean.print();
