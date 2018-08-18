@@ -115,4 +115,21 @@ public class Repository<T> {
     return promise;
   }
 
+  /**
+   * 持久化
+   * 
+   * @param model 实体
+   * @return JdbcPromise
+   */
+  public JdbcPromise<UpdateResult> update(T model) {
+    RepositoryHelper.check(tableInfo, model);
+
+    JdbcPromise<UpdateResult> promise = new JdbcPromise<>();
+    JsonArray jsonArray = new JsonArray();
+    String sql = RepositoryHelper.parseUpdate(model, jsonArray, tableInfo);
+    jdbcClient().updateWithParams(sql, jsonArray, promise);
+
+    return promise;
+  }
+
 }

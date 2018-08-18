@@ -13,6 +13,7 @@
  */
 package vip.justlive.common.web.vertx.datasource;
 
+import java.lang.reflect.Field;
 import org.apache.commons.beanutils.PropertyUtils;
 import io.vertx.core.json.JsonArray;
 import vip.justlive.common.base.datasource.TableInfo;
@@ -30,6 +31,7 @@ public class RepositoryHelper {
   public static final String SQL_TEMPLATE_SELECT_BY_ID = "select %s from %s where %s = ?";
   public static final String SQL_TEMPLATE_SELECT_BY_MODEL = "select %s from %s where 1 = 1 %s";
   public static final String SQL_TEMPLATE_INSERT = "insert into %s (%s) values (%s)";
+  public static final String SQL_TEMPLATE_UPDATE = "update %s set %s where %s = ?";
 
   RepositoryHelper() {}
 
@@ -99,20 +101,20 @@ public class RepositoryHelper {
   public static <T> String parseInsert(T model, JsonArray jsonArray, TableInfo tableInfo) {
     StringBuilder sb = new StringBuilder();
     StringBuilder seat = new StringBuilder();
-    for (TableInfo.ColumnInfo column : tableInfo.getColumns()) {
-      if (!column.getField().isAccessible()) {
-        column.getField().setAccessible(true);
-      }
-      try {
+    try {
+      for (TableInfo.ColumnInfo column : tableInfo.getColumns()) {
+        if (!column.getField().isAccessible()) {
+          column.getField().setAccessible(true);
+        }
         Object value = column.getField().get(model);
         if (value != null) {
           sb.append(TableInfo.COLUMN_SEPARATOR).append(column.getColumnName());
           seat.append(TableInfo.COLUMN_SEPARATOR).append(TableInfo.COLUMN_SEAT);
           jsonArray.add(value);
         }
-      } catch (Exception e) {
-        throw Exceptions.wrap(e);
       }
+    } catch (Exception e) {
+      throw Exceptions.wrap(e);
     }
     if (sb.length() > 0) {
       sb.deleteCharAt(0);
@@ -120,6 +122,47 @@ public class RepositoryHelper {
     }
     return String.format(SQL_TEMPLATE_INSERT, tableInfo.getTableName(), sb.toString(),
         seat.toString());
+  }
+
+  /**
+   * 解析updatre
+   * 
+   * @param model 实体
+   * @param jsonArray 参数
+   * @param tableInfo 表信息
+   * @param <T> 泛型
+   * @return sql
+   */
+  public static <T> String parseUpdate(T model, JsonArray jsonArray, TableInfo tableInfo) {
+    StringBuilder sb = new StringBuilder();
+    String primaryKey = tableInfo.getPrimaryKey().getColumnName();
+    try {
+      Field primaryField = tableInfo.getPrimaryKey().getField();
+      if (!primaryField.isAccessible()) {
+        primaryField.setAccessible(true);
+      }
+      Object primaryVal = primaryField.get(model);
+      for (TableInfo.ColumnInfo column : tableInfo.getColumns()) {
+        if (!column.isPrimaryKey()) {
+          if (!column.getField().isAccessible()) {
+            column.getField().setAccessible(true);
+          }
+          Object value = column.getField().get(model);
+          if (value != null) {
+            sb.append(TableInfo.COLUMN_SEPARATOR).append(column.getColumnName())
+                .append(TableInfo.COLUMN_EQUAL).append(TableInfo.COLUMN_SEAT);
+            jsonArray.add(value);
+          }
+        }
+      }
+      jsonArray.add(primaryVal);
+    } catch (Exception e) {
+      throw Exceptions.wrap(e);
+    }
+    if (sb.length() > 0) {
+      sb.deleteCharAt(0);
+    }
+    return String.format(SQL_TEMPLATE_UPDATE, tableInfo.getTableName(), sb.toString(), primaryKey);
   }
 
   /**
