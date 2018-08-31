@@ -22,7 +22,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -131,7 +130,7 @@ public abstract class BaseService {
    * @param <E> 泛型类
    * @return 转换后的类型
    */
-  protected <T, E> T postJsonForObject(String url, @Nullable E request, Object... uriVariables) {
+  protected <T, E> T postJsonForObject(String url, E request, Object... uriVariables) {
 
     HttpEntity<E> entity = this.buildEntity(request);
 
@@ -156,7 +155,7 @@ public abstract class BaseService {
    * @param <E> 泛型类
    * @return 转换后的类型
    */
-  protected <T, E> T formSubmitForObject(String url, @Nullable E request, Object... uriVariables) {
+  protected <T, E> T formSubmitForObject(String url, E request, Object... uriVariables) {
 
     HttpEntity<?> entity = this.buildFormEntity(request);
 

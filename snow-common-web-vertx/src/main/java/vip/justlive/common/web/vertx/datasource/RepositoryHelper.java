@@ -32,6 +32,7 @@ public class RepositoryHelper {
   public static final String SQL_TEMPLATE_SELECT_BY_MODEL = "select %s from %s where 1 = 1 %s";
   public static final String SQL_TEMPLATE_INSERT = "insert into %s (%s) values (%s)";
   public static final String SQL_TEMPLATE_UPDATE = "update %s set %s where %s = ?";
+  public static final String SQL_TEMPLATE_DELETE_BY_ID = "delete from %s where %s = ?";
 
   RepositoryHelper() {}
 

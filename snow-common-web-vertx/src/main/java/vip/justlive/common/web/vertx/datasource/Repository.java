@@ -132,4 +132,25 @@ public class Repository<T> {
     return promise;
   }
 
+  /**
+   * 根据id删除记录
+   * 
+   * @param id id
+   * @return promise
+   */
+  public JdbcPromise<UpdateResult> deleteById(Serializable id) {
+    RepositoryHelper.check(tableInfo);
+
+    TableInfo.ColumnInfo primaryKey = tableInfo.getPrimaryKey();
+    if (primaryKey == null) {
+      throw new IllegalArgumentException("@Id 缺失");
+    }
+
+    JdbcPromise<UpdateResult> promise = new JdbcPromise<>();
+    String sql = String.format(RepositoryHelper.SQL_TEMPLATE_DELETE_BY_ID, tableInfo.getTableName(),
+        tableInfo.getPrimaryKey().getColumnName());
+    jdbcClient().updateWithParams(sql, new JsonArray().add(id), promise);
+    return promise;
+  }
+
 }
